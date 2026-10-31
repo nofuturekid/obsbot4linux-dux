@@ -8,6 +8,20 @@ SectionCard {
 
     property var ctl
     readonly property var startPose: ctl.cam.state?.startup ?? null
+    // `startup set --ai` values (obsbot4linux 0.11.1); the camera reports the stored one as
+    // state.startup.ai_mode, null while none is set
+    readonly property var startModes: [
+        { label: "Not set", arg: "none", key: "" },
+        { label: "Static", arg: "static", key: "static" },
+        { label: "Normal", arg: "normal", key: "normal" },
+        { label: "Upper Body", arg: "upper-body", key: "upper_body" },
+        { label: "Headless", arg: "headless", key: "headless" },
+        { label: "Group", arg: "group", key: "group" }
+    ]
+    readonly property int startModeIndex: {
+        const key = String(startPose?.ai_mode ?? "").replace("-", "_");
+        return Math.max(0, startModes.findIndex(m => m.key === key));
+    }
 
     title: "Framing"
     enabled: ctl.live || arranging
@@ -169,6 +183,36 @@ SectionCard {
                 iconName: "start"
                 onClicked: section.ctl.send(["startup", "go"], "Moving to the start pose")
             }
+        }
+    }
+
+    // A setting stored in the camera; written only when picked here
+    ChipRow {
+        id: startModeRow
+        width: parent.width
+        stacked: true
+        visible: section.ctl.has("startup") && section.ctl.has("startup_ai")
+        label: "Start mode"
+        options: section.startModes.map(m => m.label)
+        currentIndex: section.startModeIndex
+        onSelected: index => section.ctl.send(["startup", "set", "--ai", section.startModes[index].arg], "Setting the start mode", { state: { startup: Object.assign({}, section.startPose, { ai_mode: section.startModes[index].key || null }) } })
+    }
+
+    StyledText {
+        width: parent.width
+        visible: startModeRow.visible
+        wrapMode: Text.WordWrap
+        text: "With a start mode the camera tracks in it after \"Go\" and powers on in it. Without one, \"Go\" leaves tracking stopped until a mode is picked again."
+        color: Theme.surfaceVariantText
+        font.pixelSize: Theme.fontSizeSmall
+    }
+
+    // A click assigns currentIndex and breaks the binding; re-sync to the camera state
+    Connections {
+        target: section.ctl
+        function onStateRefreshed() {
+            startModeRow.currentIndex = section.startModeIndex;
+            startModeRow.sync();
         }
     }
 }
