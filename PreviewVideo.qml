@@ -18,7 +18,28 @@ Item {
     // device for a moment and the first start fails: retry a few times instead of staying black.
     property bool restarting: false
     property int retries: 0
-    onRunningChanged: retries = 0
+    onRunningChanged: {
+        retries = 0;
+        hasFrame = false;
+    }
+    // A frame has arrived since the camera was switched on
+    property bool hasFrame: false
+
+    // A camera that was asleep (or is slow) may open without delivering frames: close and open
+    // it again, a few times, like after an error
+    Timer {
+        id: frameWatch
+        interval: 5000
+        repeat: true
+        running: root.running && !root.restarting && !root.hasFrame && root.device !== null
+        onTriggered: {
+            if (root.retries >= 10)
+                return;
+            root.retries++;
+            root.restarting = true;
+            retryTimer.restart();
+        }
+    }
 
     Timer {
         id: retryTimer
@@ -63,6 +84,14 @@ Item {
                 id: videoOutput
                 anchors.fill: parent
                 fillMode: VideoOutput.PreserveAspectFit
+            }
+
+            Connections {
+                target: videoOutput.videoSink
+                function onVideoFrameChanged() {
+                    if (videoOutput.videoSink.videoFrame.isValid)
+                        root.hasFrame = true;
+                }
             }
         }
     }

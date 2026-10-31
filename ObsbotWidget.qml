@@ -134,10 +134,21 @@ PluginComponent {
         onDisplaced: root.previewOn = false
     }
     readonly property bool live: available && awake
-    // Off whenever the picture cannot be live any more (asleep, unplugged, watch lost), here or
-    // from another surface, like the desktop widget
-    onLiveChanged: {
-        if (!live)
+    // Off when the camera goes away (unplugged, watch lost) or falls asleep while the preview was
+    // running, here or from another surface, like the desktop widget. A preview started while the
+    // camera sleeps stays on: opening the stream wakes the camera (#93).
+    property bool previewWasAwake: false
+    onPreviewOnChanged: previewWasAwake = previewOn && awake
+    onAwakeChanged: {
+        if (awake) {
+            if (previewOn)
+                previewWasAwake = true;
+        } else if (previewWasAwake) {
+            previewOn = false;
+        }
+    }
+    onAvailableChanged: {
+        if (!available)
             previewOn = false;
     }
 

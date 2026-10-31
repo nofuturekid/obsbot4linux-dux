@@ -54,11 +54,22 @@ DesktopPluginComponent {
     // Loads Qt Multimedia; not while editing
     readonly property bool interactionActive: !editing
 
-    // Stop rules: whenever the picture cannot be live any more (camera asleep, unplugged, lost),
+    // Stop rules: whenever the camera goes away (unplugged, lost) or falls asleep while the preview
+    // was running (a preview started while it sleeps stays on: opening the stream wakes it, #93),
     // and while editing. DMS also unloads the widget when it is disabled or removed, which
     // closes the camera. Otherwise the preview keeps running until the user stops it.
-    onLiveChanged: {
-        if (!live)
+    property bool previewWasAwake: false
+    onPreviewOnChanged: previewWasAwake = previewOn && awake
+    onAwakeChanged: {
+        if (awake) {
+            if (previewOn)
+                previewWasAwake = true;
+        } else if (previewWasAwake) {
+            previewOn = false;
+        }
+    }
+    onAvailableChanged: {
+        if (!available)
             previewOn = false;
     }
     onEditingChanged: {

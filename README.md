@@ -35,7 +35,8 @@ goes to its default tab, ordered by its place in the old column.
   command is in flight, Awake switch
 - preview frame (16:9, Qt Multimedia at 720p): live picture while the preview
   runs (no other app can use the camera meanwhile; it stops when the popout
-  closes), otherwise a hint with one action: Start preview, Wake camera, or
+  closes), otherwise a hint with one action: Start preview (also while the
+  camera sleeps: opening the stream wakes it), or
   Retry when the camera or obsbot4linux can't be reached
 - tracking: AI mode, speed (Standard, Headroom with obsbot4linux 0.11, Sport), tracked hand, hand
   return position (return here, go, clear; obsbot4linux 0.6.0), follow new targets (with zone tracking on
@@ -115,8 +116,8 @@ popout it has one fixed layout, a single card with the controls arranged
 around the picture:
 
 - **Picture area** (640 × 360, 16:9, top left): dark with the "Preview is off" hint and a **Start
-  preview** button while the preview is off (or Wake camera / Retry when the camera is asleep or not
-  reachable); the live picture while it runs, with **Stop preview** on hover. Stopping frees the
+  preview** button while the preview is off (also while the camera is asleep, the preview wakes it; Retry when
+  the camera is not reachable); the live picture while it runs, with **Stop preview** on hover. Stopping frees the
   camera.
 - **Right of the picture:** status with the camera state (Awake, Asleep, Offline) and the tracking
   mode, a red "On air" dot while another app reads the camera, the tracking mode chips and the

@@ -10,7 +10,7 @@ import qs.DCommon.Widgets
 // fitted inside. Used by the popout's PreviewPane and the desktop widget.
 //
 // ctl is what the frame needs from the camera: available, toolMissing, awake, live, previewReady,
-// videoNode, previewOn (read/write), interactionActive, refresh(), setAwake(on).
+// videoNode, previewOn (read/write), interactionActive, refresh().
 // interactive: false ignores hover and button (desktop edit mode).
 ClippingRectangle {
     id: frame
@@ -22,7 +22,12 @@ ClippingRectangle {
 
     // Without qt6-multimedia PreviewVideo.qml fails to load; the frame then says so
     readonly property bool videoMissing: videoLoader.status === Loader.Error
-    readonly property bool previewShown: ctl.previewOn && ctl.live && !videoMissing
+    // The preview was started while the camera slept: opening the stream wakes it, the hint says
+    // so until the first frame is there (#93)
+    property bool startedAsleep: false
+    readonly property bool frameSeen: videoLoader.item?.hasFrame ?? false
+    readonly property bool waking: ctl.previewOn && ctl.available && !videoMissing && (!ctl.awake || (startedAsleep && !frameSeen))
+    readonly property bool previewShown: ctl.previewOn && ctl.live && !videoMissing && !waking
     readonly property bool overlayShown: !previewShown || (interactive && frameHover.hovered)
     readonly property var hint: previewShown
         ? { icon: "visibility", title: "Preview is on", body: "No other app can use the camera while it's on. Stop it before a call.", button: "Stop preview", buttonIcon: "stop" }
@@ -32,8 +37,10 @@ ClippingRectangle {
             : { icon: "usb_off", title: "Camera not connected", body: "The camera doesn't respond on USB. Plug it back in.", button: "Retry", buttonIcon: "refresh" })
         : videoMissing
             ? { icon: "extension_off", title: "Preview unavailable", body: "The live preview needs qt6-multimedia. All other controls work without it.", button: "Stop preview", buttonIcon: "stop" }
+        : waking
+            ? { icon: "hourglass_empty", title: "Waking camera…", body: "Opening the stream wakes the camera. The picture follows in a moment.", button: "Stop preview", buttonIcon: "stop" }
         : !ctl.awake
-            ? { icon: "videocam_off", title: "Camera is asleep", body: "Lens is stowed face-down. Wake it to preview, track or adjust the picture.", button: "Wake camera", buttonIcon: "videocam" }
+            ? { icon: "videocam_off", title: "Camera is asleep", body: "Lens is stowed face-down. The preview wakes it; Wake in the controls only wakes it.", button: "Start preview", buttonIcon: "play_arrow" }
         : !ctl.previewReady
             ? { icon: "hourglass_empty", title: "Waiting for the camera", body: "The preview starts once the camera's video device is known.", button: "", buttonIcon: "" }
             : { icon: "visibility_off", title: "Preview is off", body: "Turn it on to see the picture while you adjust it. While it's on, no other app can use the camera.", button: "Start preview", buttonIcon: "play_arrow" }
@@ -41,16 +48,24 @@ ClippingRectangle {
     function hintAction() {
         if (!interactive)
             return;
-        if (previewShown)
+        if (previewShown || waking)
             ctl.previewOn = false;
         else if (!ctl.available)
             ctl.refresh();
         else if (videoMissing)
             ctl.previewOn = false;
-        else if (!ctl.awake)
-            ctl.setAwake(true);
-        else if (ctl.previewReady)
+        else if (ctl.previewReady) {
+            startedAsleep = !ctl.awake;
             ctl.previewOn = true;
+        }
+    }
+
+    Connections {
+        target: frame.ctl
+        function onPreviewOnChanged() {
+            if (!frame.ctl.previewOn)
+                frame.startedAsleep = false;
+        }
     }
 
     // ClippingRectangle: plain clip cuts square corners into the video
@@ -77,7 +92,7 @@ ClippingRectangle {
     Binding {
         target: videoLoader.item
         property: "running"
-        value: frame.ctl.previewOn && frame.ctl.live
+        value: frame.ctl.previewOn && frame.ctl.available
         when: videoLoader.status === Loader.Ready
     }
 
