@@ -8,6 +8,8 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-31
+
 ### Added
 
 - Presets card (Tracking tab, switch `cardPresets`): the camera's three preset slots with name and
