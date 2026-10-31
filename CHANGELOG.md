@@ -8,6 +8,15 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+### Added
+
+- Tracking card: hand tracking return position. While Hand is the tracking mode, "Return here",
+  "Go to return position" and "Clear" set, use and delete the position the camera returns to after
+  the hand left, with the stored position and the hand area shown. Needs `hand_return` (obsbot4linux
+  0.6.0) (#34).
+- Tracking card: Headroom speed chip (more room above the head), shown with `speed_headroom`
+  (obsbot4linux 0.11.0). Before, the camera's value showed as an empty label (#78).
+
 ## [0.22.0] - 2026-10-31
 
 ### Added

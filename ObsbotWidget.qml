@@ -30,8 +30,11 @@ PluginComponent {
     ]
     readonly property var speeds: [
         { label: "Standard", arg: "standard" },
+        { label: "Headroom", arg: "headroom", needs: "speed_headroom" },
         { label: "Sport", arg: "sport" }
     ]
+    // Headroom (more room above the head) needs obsbot4linux 0.11
+    readonly property var speedOptions: speeds.filter(s => !s.needs || has(s.needs))
 
     readonly property var exposureModes: [
         { label: "Global", arg: "global" },
@@ -449,7 +452,7 @@ PluginComponent {
     }
 
     function setSpeed(index) {
-        const speed = root.speeds[index];
+        const speed = root.speedOptions[index];
         root.send(["speed", speed.arg], "Setting speed to " + speed.label, { status: { tracking_speed: speed.arg } });
     }
 
