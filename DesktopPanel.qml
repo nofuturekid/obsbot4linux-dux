@@ -2,12 +2,12 @@ import QtQuick
 import qs.Common
 import qs.DCommon.Widgets
 
-// The desktop widget's control panel: status line with the on-air dot, tracking mode, zoom, the
-// camera's preset slots in use, "Show preview" and Sleep / Wake (Retry when the camera is not
-// reachable). The size stays the same when the camera is asleep or offline: the controls grey out.
+// The desktop widget's control panel, below the picture area: status line with the on-air dot,
+// tracking mode, zoom, the camera's preset slots in use and Sleep / Wake (Retry when the camera is
+// not reachable). The size stays the same when the camera is asleep or offline: the controls grey out.
 //
-// ctl is the DesktopPreview: available, toolMissing, awake, live, previewReady, streaming, aiMode,
-// trackingModes, status, zoomFactor, zoomRange, presets, presetsFailed, previewOn (write),
+// ctl is the DesktopPreview: available, toolMissing, awake, live, streaming, aiMode,
+// trackingModes, status, zoomFactor, zoomRange, presets, presetsFailed,
 // setMode(), setZoom(), stepZoom(), recallPreset(), refreshPresets(), setAwake(), refresh().
 // interactive: false ignores the buttons (desktop edit mode).
 Rectangle {
@@ -198,31 +198,17 @@ Rectangle {
             }
         }
 
-        Item {
-            width: parent.width
-            height: previewButton.implicitHeight
-
-            DButton {
-                id: previewButton
-                anchors.left: parent.left
-                text: "Show preview"
-                iconName: "play_arrow"
-                // a sleeping camera has no picture; needs the video device
-                enabled: panel.usable && panel.ctl.previewReady
-                onClicked: panel.ctl.previewOn = true
-            }
-
-            DButton {
-                anchors.right: parent.right
-                enabled: panel.interactive
-                text: !panel.ctl.available ? "Retry" : panel.ctl.awake ? "Sleep" : "Wake"
-                iconName: !panel.ctl.available ? "refresh" : panel.ctl.awake ? "bedtime" : "videocam"
-                onClicked: {
-                    if (!panel.ctl.available)
-                        panel.ctl.refresh();
-                    else
-                        panel.ctl.setAwake(!panel.ctl.awake);
-                }
+        // Starting and stopping the preview is the picture area's own button
+        DButton {
+            anchors.right: parent.right
+            enabled: panel.interactive
+            text: !panel.ctl.available ? "Retry" : panel.ctl.awake ? "Sleep" : "Wake"
+            iconName: !panel.ctl.available ? "refresh" : panel.ctl.awake ? "bedtime" : "videocam"
+            onClicked: {
+                if (!panel.ctl.available)
+                    panel.ctl.refresh();
+                else
+                    panel.ctl.setAwake(!panel.ctl.awake);
             }
         }
     }

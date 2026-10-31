@@ -105,21 +105,21 @@ switch says. Hidden cards close up; a tab without cards drops out of the tab bar
 ## Desktop widget
 
 The plugin also provides a desktop widget: add **OBSBOT Control** in Settings → Desktop
-Widgets (it is listed next to the other desktop widgets) and place it like any other. It is a
-compact control panel, 320 px wide, with the camera picture on demand:
+Widgets (it is listed next to the other desktop widgets) and place it like any other. Like the
+popout it has one fixed layout, 340 px wide:
 
-- **Panel:** status with the camera state (Awake, Asleep, Offline) and the tracking mode, a red
-  "On air" dot while another app reads the camera, tracking mode chips, zoom (slider and − / +),
-  the presets saved in the camera (empty slots are not shown; a click recalls one), **Show
-  preview** and **Sleep** / **Wake** (**Retry** when the camera is not reachable). Asleep and
-  offline keep the card size; the controls grey out.
-- **Preview:** Show preview replaces the panel with the live picture (480 × 270). Hovering it shows
-  a slim overlay with the status, tracking mode chips, zoom − / + and **Close preview**; presets
-  stay in the panel. Closing the preview frees the camera. The size switches with the state, and
-  is not saved; DMS's saved size only matters while the desktop is being edited.
+- **Picture area** (16:9, on top): dark with the "Preview is off" hint and a **Start preview**
+  button while the preview is off (or Wake camera / Retry when the camera is asleep or not
+  reachable); the live picture while it runs, with **Stop preview** on hover. Stopping frees the
+  camera.
+- **Panel** (below): status with the camera state (Awake, Asleep, Offline) and the tracking mode, a
+  red "On air" dot while another app reads the camera, tracking mode chips, zoom (slider and − / +),
+  the presets saved in the camera (empty slots are not shown; a click recalls one) and **Sleep** /
+  **Wake** (**Retry** when the camera is not reachable). Asleep and offline grey the controls out.
 
-It never starts the preview by itself: while the preview runs no other app can use the camera,
-and a small red dot in the corner shows that.
+The height follows the panel's content and is not saved; the width is fixed. The preview never
+starts by itself: while it runs no other app can use the camera, and a small red dot in the
+corner shows that.
 
 - The preview keeps running until you close it, the camera goes to sleep or is unplugged,
   or the widget is unloaded (switched off or removed in Desktop Widgets, or the desktop

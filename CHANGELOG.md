@@ -10,10 +10,10 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ### Added
 
-- Desktop widget is now a compact control panel (320 px): status with an on-air dot, tracking mode
-  chips, zoom with − / +, the camera's saved presets (recall), Show preview and Sleep / Wake. The
-  preview opens on demand in place of the panel, with a slim hover overlay (mode chips, zoom − / +,
-  Close preview); closing it frees the camera (#83).
+- Desktop widget: one fixed layout like the popout (340 px): the picture area on top (dark with the
+  "Preview is off" hint and Start button, live picture with Stop on hover) and a control panel below
+  it with status and on-air dot, tracking mode chips, zoom with − / +, the camera's saved presets
+  (recall) and Sleep / Wake. Stopping the preview frees the camera (#83).
 
 ### Removed
 

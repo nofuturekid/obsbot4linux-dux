@@ -3,10 +3,10 @@ import qs.Common
 import qs.Services
 import qs.Modules.Plugins
 
-// Desktop surface of the plugin: a compact control panel (DesktopPanel: status, tracking mode,
-// zoom, presets, sleep/wake) with an optional camera preview. "Show preview" swaps the panel for
-// the picture (PreviewFrame with a slim overlay, PreviewControls); closing it frees the camera.
-// Nothing here starts the preview by itself.
+// Desktop surface of the plugin, one fixed layout like the popout: the picture area on top
+// (PreviewFrame: dark with the "Preview is off" hint and Start button, live picture while the
+// preview runs, Stop on hover) and the control panel below it (DesktopPanel: status, tracking mode,
+// zoom, presets, sleep/wake). Nothing here starts the preview by itself.
 //
 // This surface runs its own `obsbot4linux watch` (the bar widget, the Control Center tile and
 // the popout are separate objects; the state is not shared between surfaces, only the
@@ -14,14 +14,14 @@ import qs.Modules.Plugins
 DesktopPluginComponent {
     id: root
 
-    // The panel is a fixed-width card as high as its content; the preview is 16:9. DMS keeps one
-    // saved size per widget, so each state asks for its own size with requestResize (transient,
-    // not saved) and the saved size only matters while the desktop is being edited.
-    readonly property real panelWidth: 320
-    readonly property real previewWidth: 480
-    readonly property real previewHeight: 270
-    readonly property real defaultWidth: panelWidth
-    readonly property real defaultHeight: 400
+    // Fixed layout: 16:9 picture on top, the panel below. DMS keeps one saved size per widget and
+    // the panel's height depends on the fonts and the presets, so the widget asks once for the
+    // height of its content with requestResize (transient, not saved; only the height changes
+    // with the content). Without it the saved size applies.
+    readonly property real contentWidth: 340
+    readonly property real pictureHeight: Math.round(contentWidth * 9 / 16)
+    readonly property real defaultWidth: contentWidth
+    readonly property real defaultHeight: 480
     minWidth: 240
     minHeight: 135
 
@@ -165,26 +165,17 @@ DesktopPluginComponent {
         }
     }
 
-    // Preview size and panel size: transient override, see panelWidth
-    readonly property bool previewShown: previewOn && !editing
     function applySize() {
         if (!requestResize || !clearResize)
             return;
         if (editing)
             clearResize();
-        else if (previewShown)
-            requestResize(previewWidth, previewHeight);
         else if (panel.implicitHeight > 0)
-            requestResize(panelWidth, panel.implicitHeight);
+            requestResize(contentWidth, pictureHeight + panel.implicitHeight);
     }
-    onPreviewShownChanged: applySize()
+    onEditingChanged: applySize()
     onRequestResizeChanged: applySize()
     Component.onCompleted: applySize()
-
-    // Retry button: start the watcher again now
-    function refresh() {
-        watch.refresh();
-    }
 
     // One preview at a time: starting one in the popout switches this one off and vice versa
     PreviewClaim {
@@ -210,22 +201,15 @@ DesktopPluginComponent {
         }
     }
 
-    DesktopPanel {
-        id: panel
-        visible: !root.previewShown
-        width: parent.width
-        ctl: root
-        interactive: !root.editing
-        onImplicitHeightChanged: root.applySize()
-    }
-
     PreviewFrame {
         id: frame
-        anchors.fill: parent
-        visible: root.previewShown
+        x: 0
+        y: 0
+        width: parent.width
+        height: Math.round(parent.width * 9 / 16)
         ctl: root
         interactive: !root.editing
-        slimOverlay: true
+        dropBodyWhenTight: true
 
         // On air while the picture is live (the hover overlay keeps it visible)
         Rectangle {
@@ -238,11 +222,14 @@ DesktopPluginComponent {
             anchors.margins: Theme.spacingS
             color: Theme.error
         }
+    }
 
-        PreviewControls {
-            anchors.fill: parent
-            ctl: root
-            shown: frame.previewShown && frame.overlayShown
-        }
+    DesktopPanel {
+        id: panel
+        y: frame.height
+        width: parent.width
+        ctl: root
+        interactive: !root.editing
+        onImplicitHeightChanged: root.applySize()
     }
 }

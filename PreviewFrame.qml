@@ -19,9 +19,6 @@ ClippingRectangle {
     property bool interactive: true
     // Desktop widget: drop the hint's text body when the resized frame is too small for it
     property bool dropBodyWhenTight: false
-    // Desktop widget: while the picture runs, the hover overlay is the owner's own (PreviewControls)
-    // instead of the "Preview is on" hint
-    property bool slimOverlay: false
 
     // Without qt6-multimedia PreviewVideo.qml fails to load; the frame then says so
     readonly property bool videoMissing: videoLoader.status === Loader.Error
@@ -131,7 +128,7 @@ ClippingRectangle {
         anchors.centerIn: parent
         width: parent.width - Theme.spacingXL * 2
         spacing: Theme.spacingS
-        visible: frame.overlayShown && !(frame.slimOverlay && frame.previewShown)
+        visible: frame.overlayShown
 
         // With dropBodyWhenTight the text body goes when the frame is too small for icon, title, text and button
         readonly property bool bodyFits: !frame.dropBodyWhenTight || frame.height - Theme.spacingL * 2 >= icon.height + titleText.height + bodyText.implicitHeight + (button.visible ? button.height : 0) + spacing * (button.visible ? 3 : 2)
