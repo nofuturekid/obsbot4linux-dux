@@ -63,13 +63,6 @@ DesktopPluginComponent {
         watch.write(++root.requestId, [on ? "wake" : "sleep"]);
     }
 
-    // Click on the picture: focus once on that spot (x, y 0..1 from the top left)
-    readonly property bool canFocusPoint: live && (cam.capabilities ?? []).indexOf("focus_point") >= 0
-    function focusAt(x, y) {
-        if (watch.running)
-            watch.write(++root.requestId, ["focus", "point", Math.round(x * 100) / 100, Math.round(y * 100) / 100]);
-    }
-
     // Retry button: start the watcher again now
     function refresh() {
         watch.refresh();

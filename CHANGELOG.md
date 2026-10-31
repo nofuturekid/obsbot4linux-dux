@@ -26,9 +26,6 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
   widget no longer applies the "Tracking mode on wake" setting itself; older obsbot4linux keeps
   the old behaviour. Whether the camera applies the start mode on wake, on power-on or both is
   not tested yet, so the old setting stays for now (#75).
-- Picture card: autofocus mode (Continuous / Single / Manual) with a manual focus slider, and a
-  click on the running preview (popout and desktop widget) focuses once on that spot; the hover hint then shrinks to a small stop button so it does not cover the picture. Behaviour
-  with mirror or invert on is untested (#76).
 
 ## [0.21.0] - 2026-10-31
 

@@ -540,26 +540,6 @@ PluginComponent {
         root.send(["wake", "mode", mode.arg], "Setting start mode to " + mode.label, { status: { default_work_mode: { main: mode.main, sub: mode.sub } } });
     }
 
-    // AF mode: continuous, single or manual (focus.mode in the state)
-    readonly property var afModes: ["continuous", "single", "manual"]
-    function setAfMode(index) {
-        root.send(["focus", "af", afModes[index]], "Setting autofocus to " + afModes[index], { focus: { mode: afModes[index] } });
-    }
-
-    // `focus set` turns the UVC autofocus off and writes focus_absolute; `image focus` alone is
-    // refused by the camera because UVC autofocus stays on even in its manual AF mode
-    function setManualFocus(value) {
-        root.send(["focus", "set", value], "", { image: { focus: value, autofocus: 0 } }, true);
-    }
-
-    // Click on the preview: x, y 0..1 from the top left of the picture
-    readonly property bool canFocusPoint: has("focus_point") && awake
-    function focusAt(x, y) {
-        const rx = Math.round(x * 100) / 100;
-        const ry = Math.round(y * 100) / 100;
-        root.send(["focus", "point", rx, ry], "Focusing on the chosen point", { focus: { point: [rx, ry] } });
-    }
-
     function setZoom(factor) {
         root.send(["zoom", factor.toFixed(2)], "", { zoom: { factor: factor } }, true);
     }

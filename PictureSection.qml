@@ -2,7 +2,7 @@ import QtQuick
 import qs.Common
 import qs.DCommon.Widgets
 
-// HDR, exposure mode and autofocus
+// HDR and exposure mode
 SectionCard {
     id: section
 
@@ -55,36 +55,11 @@ SectionCard {
         onMoved: value => section.ctl.setControl("gain", value)
     }
 
-    // The camera's own autofocus mode; a click on the running preview focuses once on that spot
-    ChipRow {
-        id: afRow
-        width: parent.width
-        visible: section.ctl.has("focus_af_mode")
-        label: "Autofocus"
-        options: ["Continuous", "Single", "Manual"]
-        currentIndex: section.ctl.afModes.indexOf(section.ctl.cam.focus?.mode)
-        onSelected: index => section.ctl.setAfMode(index)
-    }
-
-    // The UVC focus position (image.focus, what `focus set` writes), effective in manual mode
-    LabeledSlider {
-        width: parent.width
-        visible: section.ctl.has("focus_af_mode") && section.ctl.image.focus !== undefined
-        enabled: section.ctl.cam.focus?.mode === "manual"
-        opacity: enabled ? 1 : 0.38
-        label: "Manual focus"
-        minimum: section.ctl.image.focus?.min ?? 0
-        maximum: section.ctl.image.focus?.max ?? 100
-        value: section.ctl.image.focus?.value ?? 0
-        onMoved: value => section.ctl.setManualFocus(value)
-    }
-
     // A click assigns currentIndex and breaks the binding; re-sync to the camera state
     Connections {
         target: section.ctl
         function onStateRefreshed() {
             exposureRow.sync();
-            afRow.sync();
         }
     }
 }
