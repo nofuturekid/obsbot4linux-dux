@@ -173,7 +173,6 @@ DesktopPluginComponent {
         else if (panel.implicitHeight > 0)
             requestResize(contentWidth, pictureHeight + panel.implicitHeight);
     }
-    onEditingChanged: applySize()
     onRequestResizeChanged: applySize()
     Component.onCompleted: applySize()
 
