@@ -15,6 +15,10 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
   with on-air dot, tracking mode and speed chips, below it zoom with − / +, the camera's saved
   presets (recall) and Sleep / Wake. Stopping the preview frees the camera (#83).
 
+- Presets: with obsbot4linux 0.13 (`preset_state`) the popout's Presets card and the desktop widget take
+  the preset list from the state events and no longer send `preset list`; older versions keep the
+  request (#83).
+
 ### Removed
 
 - The "Tracking mode on wake" setting and the code that applied a mode whenever the camera woke from

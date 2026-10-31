@@ -363,7 +363,7 @@ PluginComponent {
             // not Array.isArray: the reply went through a signal, which hands arrays over as
             // list wrappers that fail it (the cause of "Reading presets..." sticking)
             if (msg.ok !== false && list && typeof list.length === "number") {
-                root.presets = Array.from(list);
+                root.listedPresets = Array.from(list);
                 root.presetsFailed = false;
                 presetTimeout.stop();
             } else {
@@ -398,7 +398,7 @@ PluginComponent {
 
     function onState(next) {
         // The card asked while the watch was not up yet, or before it restarted: read the list now
-        if (root.presets === null && root.presetsRequested && !root.presetsFailed && Object.keys(root.presetListIds).length === 0 && next.available === true && (next.capabilities ?? []).indexOf("preset") >= 0)
+        if (root.listedPresets === null && !root.has("preset_state") && root.presetsRequested && !root.presetsFailed && Object.keys(root.presetListIds).length === 0 && next.available === true && (next.capabilities ?? []).indexOf("preset") >= 0)
             Qt.callLater(root.refreshPresets);
         root.truth = next;
         root.patches = ({});
@@ -459,9 +459,19 @@ PluginComponent {
         root.send(["factory-reset", "--yes"], "Resetting to factory settings");
     }
 
-    // Presets stored in the camera: null until `preset list` has answered. They are not part of
-    // the state events, so the Presets card asks for the list when it needs it and after each change.
-    property var presets: null
+    // Presets stored in the camera. Before obsbot4linux 0.13 they are not part of the state events:
+    // the Presets card then asks for the list when it needs it and after each change, and
+    // `listedPresets` is null until `preset list` has answered.
+    property var listedPresets: null
+    // With obsbot4linux 0.13 (capability preset_state) the list is part of the state events and is
+    // re-sent after every change (null: no answer); older versions are asked with `preset list`.
+    // Arrays from the state may come as list wrappers, hence length and Array.from.
+    readonly property var presets: {
+        if (!has("preset_state"))
+            return listedPresets;
+        const list = cam.presets;
+        return list && typeof list.length === "number" ? Array.from(list) : null;
+    }
     // Ids of the `preset list` requests not answered yet
     property var presetListIds: ({})
     // The card asked at least once; the list is then read again after a watch restart
@@ -472,6 +482,8 @@ PluginComponent {
     property var presetOps: ({})
 
     function refreshPresets() {
+        if (root.has("preset_state"))
+            return;
         root.presetsRequested = true;
         root.presetsFailed = false;
         if (!watch.running)
@@ -487,7 +499,7 @@ PluginComponent {
         id: presetTimeout
         interval: 8000
         onTriggered: {
-            if (root.presets === null)
+            if (root.listedPresets === null)
                 root.presetsFailed = true;
         }
     }
@@ -620,7 +632,7 @@ PluginComponent {
             root.cam = ({});
             root.truth = ({});
             root.pendingLabel = "";
-            root.presets = null;
+            root.listedPresets = null;
             root.presetListIds = ({});
             root.presetsFailed = false;
             presetTimeout.stop();

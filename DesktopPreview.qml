@@ -128,14 +128,23 @@ DesktopPluginComponent {
         root.setZoom(root.zoomFactor + delta);
     }
 
-    // Presets stored in the camera: null until `preset list` has answered, [{slot, name, pose}]
-    // for the slots in use (empty slots are not listed)
-    property var presets: null
+    // Presets stored in the camera, [{slot, name, pose}] for the slots in use (empty slots are not
+    // listed). `listedPresets` is the answer to `preset list`, null until it came.
+    property var listedPresets: null
+    // With obsbot4linux 0.13 (capability preset_state) the list is part of the state events and is
+    // re-sent after every change (null: no answer); older versions are asked with `preset list`.
+    // Arrays from the state may come as list wrappers, hence length and Array.from.
+    readonly property var presets: {
+        if (!has("preset_state"))
+            return listedPresets;
+        const list = cam.presets;
+        return list && typeof list.length === "number" ? Array.from(list) : null;
+    }
     property bool presetsFailed: false
     property int presetListId: 0
 
     function refreshPresets() {
-        if (!watch.running)
+        if (!watch.running || root.has("preset_state"))
             return;
         root.presetsFailed = false;
         root.presetListId = ++root.requestId;
@@ -155,7 +164,7 @@ DesktopPluginComponent {
         // not Array.isArray: the reply went through a signal, which hands arrays over as list
         // wrappers that fail it
         if (msg.ok !== false && list && typeof list.length === "number") {
-            root.presets = Array.from(list);
+            root.listedPresets = Array.from(list);
             root.presetsFailed = false;
             presetTimeout.stop();
         } else {
@@ -174,7 +183,7 @@ DesktopPluginComponent {
         id: presetTimeout
         interval: 8000
         onTriggered: {
-            if (root.presets === null)
+            if (root.listedPresets === null)
                 root.presetsFailed = true;
         }
     }
@@ -209,7 +218,7 @@ DesktopPluginComponent {
         onReply: msg => root.handleReply(msg)
         onStopped: {
             root.cam = ({});
-            root.presets = null;
+            root.listedPresets = null;
             root.presetListId = 0;
             root.presetsFailed = false;
             presetTimeout.stop();
