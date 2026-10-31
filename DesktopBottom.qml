@@ -109,36 +109,26 @@ Item {
             visible: (bottom.ctl.presets?.length ?? 0) > 0
 
             readonly property real slotWidth: (width - spacing * 2) / 3
-            readonly property var slotColors: [
-                { bg: Theme.primaryContainer, fg: Theme.onPrimaryContainer },
-                { bg: Theme.secondaryContainer, fg: Theme.onSecondaryContainer },
-                { bg: Theme.tertiaryContainer, fg: Theme.onTertiaryContainer }
-            ]
 
-            Repeater {
-                    model: [0, 1, 2]
+            PresetSlot {
+                width: slotRow.slotWidth
+                height: slotRow.height
+                ctl: bottom.ctl
+                slotIndex: 0
+            }
 
-                delegate: Item {
-                    id: slotItem
+            PresetSlot {
+                width: slotRow.slotWidth
+                height: slotRow.height
+                ctl: bottom.ctl
+                slotIndex: 1
+            }
 
-                    required property int modelData
-                    readonly property var preset: (bottom.ctl.presets ?? []).find(p => p.slot === modelData) ?? null
-
-                    width: slotRow.slotWidth
-                    height: slotRow.height
-
-                    DButton {
-                        visible: slotItem.preset !== null
-                        width: parent.width
-                        minimumWidth: 0
-                        maximumWidth: slotRow.slotWidth
-                        text: slotItem.preset?.name ?? ""
-                        tooltipText: slotItem.preset?.name ?? ""
-                        backgroundColor: slotRow.slotColors[slotItem.modelData].bg
-                        textColor: slotRow.slotColors[slotItem.modelData].fg
-                        onClicked: bottom.ctl.recallPreset(slotItem.modelData)
-                    }
-                }
+            PresetSlot {
+                width: slotRow.slotWidth
+                height: slotRow.height
+                ctl: bottom.ctl
+                slotIndex: 2
             }
         }
 
