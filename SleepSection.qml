@@ -13,7 +13,7 @@ SectionCard {
     title: "Sleep"
     collapsible: true
     expanded: false
-    visible: ctl.cardEnabled("Sleep") && (ctl.has("auto_sleep") || ctl.has("sleep_background"))
+    visible: ctl.cardEnabled("Sleep") && (ctl.has("auto_sleep") || ctl.has("sleep_background") || ctl.has("wake_zoom") || ctl.has("wake_mode"))
     summary: [ctl.status.auto_sleep_enabled === undefined ? "" : "Auto-sleep " + (ctl.status.auto_sleep_enabled ? ctl.status.auto_sleep_seconds + " s" : "off"), ctl.status.sleep_background ? "background " + ctl.status.sleep_background : ""].filter(s => s !== "").join(" · ")
     // Unlike the other settings these matter (and work) while the camera is asleep
     enabled: ctl.available || arranging
@@ -44,11 +44,38 @@ SectionCard {
         onSelected: index => section.ctl.send(["sleep-background", section.backgrounds[index].toLowerCase()], "Setting sleep background to " + section.backgrounds[index], { status: { sleep_background: section.backgrounds[index].toLowerCase() } })
     }
 
+    // What the camera does when it wakes up, stored in the camera: also without the widget running
+    LabeledSlider {
+        width: parent.width
+        visible: section.ctl.has("wake_zoom")
+        enabled: section.ctl.status.wake_up_zoom_percent !== undefined
+        opacity: enabled ? 1 : 0.38
+        label: "Wake-up zoom"
+        // hundredths: percent p is 1 + 3 * p / 100
+        minimum: 100
+        maximum: 400
+        value: 100 + 3 * (section.ctl.status.wake_up_zoom_percent ?? 0)
+        formatValue: v => (v / 100).toFixed(2) + "×"
+        onMoved: value => section.ctl.setWakeZoom(value)
+    }
+
+    ChipRow {
+        id: wakeModeRow
+        width: parent.width
+        visible: section.ctl.has("wake_mode")
+        label: "Start mode on wake"
+        stacked: true
+        options: section.ctl.trackingModes.map(m => m.label)
+        currentIndex: section.ctl.wakeModeIndex()
+        onSelected: index => section.ctl.setWakeMode(index)
+    }
+
     Connections {
         target: section.ctl
         function onStateRefreshed() {
             autoSleepRow.sync();
             backgroundRow.sync();
+            wakeModeRow.sync();
         }
     }
 }

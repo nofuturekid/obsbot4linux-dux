@@ -15,7 +15,7 @@ SectionCard {
     collapsible: true
     expanded: false
     visible: ctl.cardEnabled("Audio") && ctl.has("audio")
-    summary: [ctl.status.noise_reduction ? "Noise reduction " + ctl.status.noise_reduction : "", ctl.status.pickup_distance ? "pickup " + ctl.status.pickup_distance : "", ctl.status.auto_gain !== undefined ? "auto gain " + (ctl.status.auto_gain ? "on" : "off") : "", ctl.status.mic_in_sleep !== undefined ? "mic asleep " + (ctl.status.mic_in_sleep ? "on" : "off") : ""].filter(s => s !== "").join(" · ")
+    summary: [ctl.status.noise_reduction ? "Noise reduction " + ctl.status.noise_reduction : "", ctl.status.pickup_distance ? "pickup " + ctl.status.pickup_distance : "", ctl.cam.audio_volume !== undefined && ctl.cam.audio_volume !== null ? "volume " + ctl.cam.audio_volume : "", ctl.status.auto_gain !== undefined ? "auto gain " + (ctl.status.auto_gain ? "on" : "off") : "", ctl.status.mic_in_sleep !== undefined ? "mic asleep " + (ctl.status.mic_in_sleep ? "on" : "off") : ""].filter(s => s !== "").join(" · ")
     // the camera takes these while asleep too and keeps them when it wakes
     enabled: ctl.available || arranging
     opacity: ctl.available || arranging ? 1 : 0.38
@@ -37,6 +37,19 @@ SectionCard {
         options: section.distances
         currentIndex: section.distances.findIndex(d => d.toLowerCase() === section.ctl.status.pickup_distance)
         onSelected: index => section.ctl.send(["audio", "distance", section.distances[index].toLowerCase()], "Setting pickup distance to " + section.distances[index], { status: { pickup_distance: section.distances[index].toLowerCase() } })
+    }
+
+    // Null in the state while the camera sleeps or does not answer; the pickup distance above follows it
+    LabeledSlider {
+        width: parent.width
+        visible: section.ctl.has("audio_volume")
+        enabled: section.ctl.cam.audio_volume !== undefined && section.ctl.cam.audio_volume !== null
+        opacity: enabled ? 1 : 0.38
+        label: "Microphone volume"
+        minimum: 0
+        maximum: 100
+        value: section.ctl.cam.audio_volume ?? 0
+        onMoved: value => section.ctl.setVolume(value)
     }
 
     ToggleRow {

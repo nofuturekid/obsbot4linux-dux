@@ -19,6 +19,17 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 - Camera card: read-only info line with firmware, anti-flicker, frame rate, digital zoom and
   wake-up zoom; a value the installed obsbot4linux does not report is left out (#67).
 
+- Audio card: microphone volume slider; Camera card: status LED blink switch (the camera cannot
+  report it, so it shows the last value set from the widget). Each shows only with obsbot4linux
+  0.10 or newer (#74).
+- Sleep card: wake-up zoom and start mode on wake, set in the camera. With `wake_mode` the
+  widget no longer applies the "Tracking mode on wake" setting itself; older obsbot4linux keeps
+  the old behaviour. Whether the camera applies the start mode on wake, on power-on or both is
+  not tested yet, so the old setting stays for now (#75).
+- Picture card: autofocus mode (Continuous / Single / Manual) with a manual focus slider, and a
+  click on the running preview (popout and desktop widget) focuses once on that spot. Behaviour
+  with mirror or invert on is untested (#76).
+
 ## [0.21.0] - 2026-10-31
 
 ### Added

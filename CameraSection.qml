@@ -31,7 +31,7 @@ SectionCard {
         return v === undefined || v === null ? "" : v + " %";
     }
 
-    readonly property var infoLines: [["Firmware", ctl.cam.firmware ?? ""], ["Anti-flicker", antiFlicker()], ["Frame rate", ctl.status.frame_rate !== undefined ? ctl.status.frame_rate + " fps" : ""], ["Digital zoom", percent(ctl.status.digital_zoom_percent)], ["Wake-up zoom", percent(ctl.status.wake_up_zoom_percent)]].filter(l => l[1] !== "")
+    readonly property var infoLines: [["Firmware", ctl.cam.firmware ?? ""], ["Anti-flicker", antiFlicker()], ["Frame rate", ctl.status.frame_rate !== undefined ? ctl.status.frame_rate + " fps" : ""], ["Digital zoom", percent(ctl.status.digital_zoom_percent)], ["Wake-up zoom", ctl.has("wake_zoom") ? "" : percent(ctl.status.wake_up_zoom_percent)]].filter(l => l[1] !== "")
 
     title: "Camera"
     collapsible: true
@@ -63,6 +63,15 @@ SectionCard {
         options: section.leds
         currentIndex: section.ctl.status.led ?? -1
         onSelected: index => section.ctl.send(["led", index], "Setting status LED to " + section.leds[index], { status: { led: index } })
+    }
+
+    ToggleRow {
+        width: parent.width
+        visible: section.ctl.has("led_blink")
+        label: "Blink status LED"
+        description: "The camera cannot report this; shows the last value set here"
+        checked: section.ctl.ledBlink
+        onToggled: checked => section.ctl.setLedBlink(checked)
     }
 
     ToggleRow {

@@ -16,15 +16,17 @@ PluginComponent {
     // optimistically when a command goes out; the next event overwrites the patch.
 
     // key = ai_mode in obsbot4linux's state, arg = `obsbot4linux tracking <arg>`
+    // main/sub: the mode/sub-mode pair obsbot4linux reads back as status.default_work_mode
+    // (main << 4 | sub in the camera; obsbot4linux src/commands.rs AiMode::to_bytes)
     readonly property var trackingModes: [
-        { label: "Static", arg: "static", key: "static" },
-        { label: "Normal Tracking", arg: "normal", key: "normal" },
-        { label: "Upper Body", arg: "upper-body", key: "upper_body" },
-        { label: "Close-up", arg: "close-up", key: "close_up" },
-        { label: "Headless", arg: "headless", key: "headless" },
-        { label: "Lower Body", arg: "lower-body", key: "lower_body" },
-        { label: "Hand", arg: "hand", key: "hand" },
-        { label: "Group", arg: "group", key: "group" }
+        { label: "Static", arg: "static", key: "static", main: 0, sub: 0 },
+        { label: "Normal Tracking", arg: "normal", key: "normal", main: 2, sub: 0 },
+        { label: "Upper Body", arg: "upper-body", key: "upper_body", main: 2, sub: 1 },
+        { label: "Close-up", arg: "close-up", key: "close_up", main: 2, sub: 2 },
+        { label: "Headless", arg: "headless", key: "headless", main: 2, sub: 3 },
+        { label: "Lower Body", arg: "lower-body", key: "lower_body", main: 2, sub: 4 },
+        { label: "Hand", arg: "hand", key: "hand", main: 3, sub: 0 },
+        { label: "Group", arg: "group", key: "group", main: 1, sub: 0 }
     ]
     readonly property var speeds: [
         { label: "Standard", arg: "standard" },
@@ -302,6 +304,11 @@ PluginComponent {
     function patch(changes) {
         const s = Object.assign({}, root.cam);
         for (const group in changes) {
+            // top-level scalars such as audio_volume
+            if (typeof changes[group] !== "object") {
+                s[group] = changes[group];
+                continue;
+            }
             s[group] = Object.assign({}, s[group]);
             for (const key in changes[group])
                 s[group][key] = group === "image" ? Object.assign({}, s.image[key], { value: changes[group][key] }) : changes[group][key];
@@ -374,12 +381,15 @@ PluginComponent {
             const rest = Object.assign({}, root.patches);
             delete rest[msg.id];
             root.patches = rest;
-            const held = dragHold.running ? { image: root.cam.image, zoom: root.cam.zoom } : null;
+            const heldWakeZoom = root.cam.status?.wake_up_zoom_percent;
+            const held = dragHold.running ? { image: root.cam.image, zoom: root.cam.zoom, audio_volume: root.cam.audio_volume } : null;
             root.cam = root.truth;
             for (const id in rest)
                 root.patch(rest[id]);
-            if (held)
+            if (held) {
+                held.status = Object.assign({}, root.cam.status, { wake_up_zoom_percent: heldWakeZoom });
                 root.cam = Object.assign({}, root.cam, held);
+            }
             root.stateRefreshed();
         }
     }
@@ -395,13 +405,16 @@ PluginComponent {
             const s = Object.assign({}, next);
             s.image = root.cam.image;
             s.zoom = root.cam.zoom;
+            s.audio_volume = root.cam.audio_volume;
+            s.status = Object.assign({}, next.status, { wake_up_zoom_percent: root.cam.status?.wake_up_zoom_percent });
             root.cam = s;
         } else {
             root.cam = next;
         }
         // Only on a real asleep -> awake change seen in events, not on the first state after a DMS
-        // start, and only by the one instance that holds `wakeSender`
-        if (was === true && next.status?.asleep === false && root.wakeTrackingMode !== "" && root.wakeSender === root.wakeToken)
+        // start, and only by the one instance that holds `wakeSender`. With `wake_mode` the camera
+        // has its own start mode (Sleep card) and this old setting is not applied.
+        if (was === true && next.status?.asleep === false && root.wakeTrackingMode !== "" && !root.has("wake_mode") && root.wakeSender === root.wakeToken)
             root.send(["tracking", root.wakeTrackingMode]);
         const mode = next.status?.ai_mode;
         if (mode && mode !== "static" && mode !== root.lastTrackingMode)
@@ -497,6 +510,48 @@ PluginComponent {
 
     function setControl(name, value) {
         root.send(["image", name, value], "", { image: { [name]: value } }, true);
+    }
+
+    function setVolume(value) {
+        root.send(["audio", "volume", value], "", { audio_volume: value }, true);
+    }
+
+    // obsbot4linux cannot read the LED blink back: the last value set here is remembered
+    readonly property bool ledBlink: pluginData?.ledBlink ?? false
+    function setLedBlink(on) {
+        pluginService?.savePluginData(pluginId, "ledBlink", on);
+        root.send(["led", "blink", on ? "on" : "off"], on ? "Letting the status LED blink" : "Letting the status LED burn steadily");
+    }
+
+    // Wake-up zoom in hundredths (the camera stores 0-100 percent: zoom = 1 + 3 * percent / 100)
+    function setWakeZoom(hundredths) {
+        const percent = Math.round((hundredths / 100 - 1) * 100 / 3);
+        root.send(["wake", "zoom", (hundredths / 100).toFixed(2)], "", { status: { wake_up_zoom_percent: percent } }, true);
+    }
+
+    // Index in trackingModes of the start mode the camera reports, -1 when unknown
+    function wakeModeIndex() {
+        const m = status.default_work_mode;
+        return m ? trackingModes.findIndex(t => t.main === m.main && t.sub === m.sub) : -1;
+    }
+
+    function setWakeMode(index) {
+        const mode = root.trackingModes[index];
+        root.send(["wake", "mode", mode.arg], "Setting start mode to " + mode.label, { status: { default_work_mode: { main: mode.main, sub: mode.sub } } });
+    }
+
+    // AF mode: continuous, single or manual (focus.mode in the state)
+    readonly property var afModes: ["continuous", "single", "manual"]
+    function setAfMode(index) {
+        root.send(["focus", "af", afModes[index]], "Setting autofocus to " + afModes[index], { focus: { mode: afModes[index] } });
+    }
+
+    // Click on the preview: x, y 0..1 from the top left of the picture
+    readonly property bool canFocusPoint: has("focus_point") && awake
+    function focusAt(x, y) {
+        const rx = Math.round(x * 100) / 100;
+        const ry = Math.round(y * 100) / 100;
+        root.send(["focus", "point", rx, ry], "Focusing on the chosen point", { focus: { point: [rx, ry] } });
     }
 
     function setZoom(factor) {

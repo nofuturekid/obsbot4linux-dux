@@ -10,7 +10,8 @@ import qs.DCommon.Widgets
 // fitted inside. Used by the popout's PreviewPane and the desktop widget.
 //
 // ctl is what the frame needs from the camera: available, toolMissing, awake, live, previewReady,
-// videoNode, previewOn (read/write), interactionActive, refresh(), setAwake(on).
+// videoNode, previewOn (read/write), interactionActive, refresh(), setAwake(on), and optionally
+// canFocusPoint and focusAt(x, y): a click on the running picture then focuses on that spot.
 // interactive: false ignores hover and button (desktop edit mode).
 ClippingRectangle {
     id: frame
@@ -24,8 +25,12 @@ ClippingRectangle {
     readonly property bool videoMissing: videoLoader.status === Loader.Error
     readonly property bool previewShown: ctl.previewOn && ctl.live && !videoMissing
     readonly property bool overlayShown: !previewShown || (interactive && frameHover.hovered)
+    readonly property bool focusClick: previewShown && interactive && (ctl.canFocusPoint ?? false)
+    // The video is 16:9 and fitted inside the frame (PreserveAspectFit): bars at the sides or top
+    readonly property real videoWidth: Math.min(width, height * 16 / 9)
+    readonly property real videoHeight: videoWidth * 9 / 16
     readonly property var hint: previewShown
-        ? { icon: "visibility", title: "Preview is on", body: "No other app can use the camera while it's on. Stop it before a call.", button: "Stop preview", buttonIcon: "stop" }
+        ? { icon: "visibility", title: "Preview is on", body: "No other app can use the camera while it's on. Stop it before a call." + (focusClick ? " Click the picture to focus on that spot." : ""), button: "Stop preview", buttonIcon: "stop" }
         : !ctl.available
         ? (ctl.toolMissing
             ? { icon: "terminal", title: "Control tool not found", body: "obsbot4linux could not be run. Check that it is installed and on PATH.", button: "Retry", buttonIcon: "refresh" }
@@ -108,6 +113,45 @@ ClippingRectangle {
             Behavior on y { NumberAnimation { duration: 250 } }
             Behavior on width { NumberAnimation { duration: 250 } }
             Behavior on height { NumberAnimation { duration: 250 } }
+        }
+    }
+
+    // Click on the picture -> focus point, normalised to the video (not the frame, so the bars of
+    // a letterboxed frame are ignored). Not mirrored or flipped here: with mirror or invert on the
+    // firmware's coordinates are untested. The overlay's own button keeps its click.
+    TapHandler {
+        enabled: frame.focusClick
+        onTapped: eventPoint => {
+            const p = eventPoint.position;
+            if (button.visible && button.contains(button.mapFromItem(frame, p.x, p.y)))
+                return;
+            const x = (p.x - (frame.width - frame.videoWidth) / 2) / frame.videoWidth;
+            const y = (p.y - (frame.height - frame.videoHeight) / 2) / frame.videoHeight;
+            if (x < 0 || x > 1 || y < 0 || y > 1)
+                return;
+            frame.ctl.focusAt(x, y);
+            focusMark.x = p.x - focusMark.width / 2;
+            focusMark.y = p.y - focusMark.height / 2;
+            focusMarkFade.restart();
+        }
+    }
+
+    // Shows for a moment where the click went
+    Rectangle {
+        id: focusMark
+        width: Theme.iconSizeLarge
+        height: width
+        radius: Theme.cornerRadius
+        color: "transparent"
+        border.width: 2
+        border.color: Theme.primary
+        opacity: 0
+
+        SequentialAnimation {
+            id: focusMarkFade
+            PropertyAction { target: focusMark; property: "opacity"; value: 1 }
+            PauseAnimation { duration: 600 }
+            NumberAnimation { target: focusMark; property: "opacity"; to: 0; duration: 400 }
         }
     }
 

@@ -9,7 +9,7 @@ PluginSettings {
     SelectionSetting {
         settingKey: "wakeTrackingMode"
         label: "Tracking mode on wake"
-        description: "Applied whenever the camera wakes up"
+        description: "Applied whenever the camera wakes up. Not used with obsbot4linux 0.10 or newer: set the start mode in the Sleep card instead"
         options: [
             { label: "Keep current", value: "" },
             { label: "Static", value: "static" },
