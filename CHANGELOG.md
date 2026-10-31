@@ -8,6 +8,29 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+### Added
+
+- Zone card: zone views (obsbot4linux 0.12, `zone_views`): the camera's named poses with Go, Rename
+  and Delete (two-click confirmation) and "Save current pose as view"; a note that in a tracking
+  mode Go only applies the zoom (#84).
+- Tracking card, while Hand is the tracking mode: the hand tracking area (four sliders and "Default
+  area"), switches for whether the hand moves pan and tilt, the return time in seconds and a gimbal
+  switch, each with its own capability (obsbot4linux 0.12; `hand_area`, `hand_axes`,
+  `hand_return_after`, `hand_gimbal`). The camera does not report the gimbal switch: it shows the
+  last value set from the widget (#85).
+
+### Changed
+
+- Sleep card: "Zoom at power-on" is gone: the camera applies it neither at power-on nor on wake
+  (obsbot4linux#102). "Tracking mode at power-on" stays; the stored wake-up zoom is listed in the
+  Camera card (#87).
+
+### Fixed
+
+- Desktop widget: the zoom slider and value followed the camera only until the first drag or
+  replug, then stayed stale; they follow every state event now, and show two decimals like the
+  popout (#87).
+
 ## [0.24.0] - 2026-10-31
 
 ### Added

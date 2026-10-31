@@ -31,7 +31,7 @@ SectionCard {
         return v === undefined || v === null ? "" : v + " %";
     }
 
-    readonly property var infoLines: [["Firmware", ctl.cam.firmware ?? ""], ["Anti-flicker", antiFlicker()], ["Frame rate", ctl.status.frame_rate !== undefined ? ctl.status.frame_rate + " fps" : ""], ["Digital zoom", percent(ctl.status.digital_zoom_percent)], ["Wake-up zoom", ctl.has("wake_zoom") ? "" : percent(ctl.status.wake_up_zoom_percent)]].filter(l => l[1] !== "")
+    readonly property var infoLines: [["Firmware", ctl.cam.firmware ?? ""], ["Anti-flicker", antiFlicker()], ["Frame rate", ctl.status.frame_rate !== undefined ? ctl.status.frame_rate + " fps" : ""], ["Digital zoom", percent(ctl.status.digital_zoom_percent)], ["Wake-up zoom", percent(ctl.status.wake_up_zoom_percent)]].filter(l => l[1] !== "")
 
     title: "Camera"
     collapsible: true

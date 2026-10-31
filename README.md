@@ -55,9 +55,14 @@ goes to its default tab, ordered by its place in the old column.
   "Full area"), the return position with "Return here" (current pose) and "Go to return
   position", all read back from the camera. Leaving the area stops tracking (Static, back to the return
   position) unless "Follow new targets" is on, then the camera waits for the next person
+  Zone views (obsbot4linux 0.12): the camera's named poses with Go, Rename, Delete and "Save current
+  pose as view"; in a tracking mode Go only applies the zoom, in Static the full pose
+- hand tracking (Tracking card, while Hand is the mode; obsbot4linux 0.12): area sliders, pan and tilt
+  switches, return time and a gimbal switch (the camera cannot report it, the switch shows the last
+  value set here)
 - picture: HDR, exposure Global / Face / Custom (exposure time and gain)
 - camera: field of view, status LED and LED blink (the camera cannot report it, the switch shows the last value set here), mirror, invert; read-only firmware, anti-flicker, frame rate, digital zoom
-- sleep: auto-sleep and the picture while asleep; zoom and tracking mode at power-on, stored in the camera (obsbot4linux 0.10; the camera applies them when it is powered on, not when it wakes from sleep)
+- sleep: auto-sleep and the picture while asleep; tracking mode at power-on, stored in the camera (obsbot4linux 0.10; the camera applies it when it is powered on, not when it wakes from sleep); the camera ignores a stored wake-up zoom, so it is shown only in the Camera card
 - image adjustments: brightness, contrast, saturation, sharpness, backlight
   compensation, reset to defaults
 - audio: noise reduction, pickup distance, microphone volume, automatic gain, microphone while asleep

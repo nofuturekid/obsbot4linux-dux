@@ -531,6 +531,14 @@ PluginComponent {
         root.send(["led", "blink", on ? "on" : "off"], on ? "Letting the status LED blink" : "Letting the status LED burn steadily");
     }
 
+    // obsbot4linux cannot read the hand gimbal switch back (the camera does not keep it): the last
+    // value set here is remembered; the camera's own default is on
+    readonly property bool handGimbal: pluginData?.handGimbal ?? true
+    function setHandGimbal(on) {
+        pluginService?.savePluginData(pluginId, "handGimbal", on);
+        root.send(["hand", "gimbal", on ? "on" : "off"], on ? "Letting the hand tracker move the gimbal" : "Stopping the hand tracker's gimbal");
+    }
+
     // Wake-up zoom in hundredths (the camera stores 0-100 percent: zoom = 1 + 3 * percent / 100)
     function setWakeZoom(hundredths) {
         const percent = Math.round((hundredths / 100 - 1) * 100 / 3);

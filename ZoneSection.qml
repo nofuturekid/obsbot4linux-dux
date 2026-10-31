@@ -192,4 +192,10 @@ SectionCard {
         color: Theme.surfaceVariantText
         font.pixelSize: Theme.fontSizeSmall
     }
+
+    ZoneViews {
+        width: parent.width
+        visible: section.ctl.has("zone_views")
+        ctl: section.ctl
+    }
 }

@@ -99,6 +99,13 @@ SectionCard {
         font.pixelSize: Theme.fontSizeSmall
     }
 
+    // Only while hand tracking is selected; each part checks its own capability
+    HandControls {
+        width: parent.width
+        visible: !section.compact && section.ctl.status.ai_mode === "hand" && (section.ctl.has("hand_area") || section.ctl.has("hand_axes") || section.ctl.has("hand_return_after") || section.ctl.has("hand_gimbal"))
+        ctl: section.ctl
+    }
+
     // Measured with zone tracking on (Tiny 2 Lite): when the target left the area the camera kept
     // tracking and took a new one. Before obsbot4linux 0.7.3 its pose polling made it go Static
     // instead (nofuturekid/obsbot4linux#67). Not in the compact tile.

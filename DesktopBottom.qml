@@ -44,7 +44,7 @@ Item {
 
         StyledText {
             x: bottom.sectionWidth - width
-            text: (zoomSlider.value / 10).toFixed(1) + "×"
+            text: (zoomSlider.isDragging ? zoomSlider.value / 10 : bottom.ctl.zoomFactor).toFixed(2) + "×"
             color: Theme.surfaceVariantText
             font.pixelSize: Theme.fontSizeSmall
             opacity: bottom.ctl.live ? 1 : 0.38
@@ -97,8 +97,17 @@ Item {
                 // tenths, the step the buttons and the wheel use
                 minimum: Math.round(bottom.ctl.zoomRange[0] * 10)
                 maximum: Math.round(bottom.ctl.zoomRange[1] * 10)
-                value: Math.round(bottom.ctl.zoomFactor * 10)
                 onSliderDragFinished: finalValue => bottom.ctl.setZoom(finalValue / 10)
+            }
+
+            // A drag assigns the slider's value and breaks a plain `value:` binding, so the handle
+            // stayed where it was after a replug or any zoom change from elsewhere; this keeps
+            // following the state (also after available false -> true).
+            Binding {
+                target: zoomSlider
+                property: "value"
+                value: Math.round(bottom.ctl.zoomFactor * 10)
+                restoreMode: Binding.RestoreNone
             }
 
             DButton {

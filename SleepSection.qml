@@ -13,7 +13,7 @@ SectionCard {
     title: "Sleep"
     collapsible: true
     expanded: false
-    visible: ctl.cardEnabled("Sleep") && (ctl.has("auto_sleep") || ctl.has("sleep_background") || ctl.has("wake_zoom") || ctl.has("wake_mode"))
+    visible: ctl.cardEnabled("Sleep") && (ctl.has("auto_sleep") || ctl.has("sleep_background") || ctl.has("wake_mode"))
     summary: [ctl.status.auto_sleep_enabled === undefined ? "" : "Auto-sleep " + (ctl.status.auto_sleep_enabled ? ctl.status.auto_sleep_seconds + " s" : "off"), ctl.status.sleep_background ? "background " + ctl.status.sleep_background : ""].filter(s => s !== "").join(" · ")
     // Unlike the other settings these matter (and work) while the camera is asleep
     enabled: ctl.available || arranging
@@ -45,28 +45,16 @@ SectionCard {
     }
 
     // Stored in the camera and used when it powers on (plugged in), also without the widget running.
-    // Waking from sleep, by command or by an app's stream, does not apply them (measured, #75)
+    // Waking from sleep, by command or by an app's stream, does not apply it (measured, #75).
+    // "Zoom at power-on" (wake_zoom) is not offered: the camera applies it neither at power-on nor
+    // on wake (obsbot4linux#102); the value stays readable in the Camera card.
     StyledText {
         width: parent.width
-        visible: section.ctl.has("wake_zoom") || section.ctl.has("wake_mode")
+        visible: section.ctl.has("wake_mode")
         wrapMode: Text.WordWrap
-        text: "Power-on settings: waking from sleep does not apply them."
+        text: "Power-on setting: waking from sleep does not apply it."
         color: Theme.surfaceVariantText
         font.pixelSize: Theme.fontSizeSmall
-    }
-
-    LabeledSlider {
-        width: parent.width
-        visible: section.ctl.has("wake_zoom")
-        enabled: section.ctl.status.wake_up_zoom_percent !== undefined
-        opacity: enabled ? 1 : 0.38
-        label: "Zoom at power-on"
-        // hundredths: percent p is 1 + 3 * p / 100
-        minimum: 100
-        maximum: 400
-        value: 100 + 3 * (section.ctl.status.wake_up_zoom_percent ?? 0)
-        formatValue: v => (v / 100).toFixed(2) + "×"
-        onMoved: value => section.ctl.setWakeZoom(value)
     }
 
     ChipRow {
