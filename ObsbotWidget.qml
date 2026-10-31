@@ -44,7 +44,6 @@ PluginComponent {
     // Manual exposure (UVC auto_exposure 1): exposure_time and gain then set the brightness
     readonly property bool manualExposure: (image.auto_exposure?.value ?? 0) === 1
     // Settings page: tracking mode applied whenever the camera wakes up ("" = keep)
-    readonly property string wakeTrackingMode: pluginData?.wakeTrackingMode ?? ""
     // Settings page: the pill's mouse wheel zooms, its middle click toggles tracking
     readonly property bool wheelZoom: pluginData?.wheelZoom ?? true
     readonly property bool middleClickTracking: pluginData?.middleClickTracking ?? true
@@ -398,7 +397,6 @@ PluginComponent {
     }
 
     function onState(next) {
-        const was = root.truth.status?.asleep;
         // The card asked while the watch was not up yet, or before it restarted: read the list now
         if (root.presets === null && root.presetsRequested && !root.presetsFailed && Object.keys(root.presetListIds).length === 0 && next.available === true && (next.capabilities ?? []).indexOf("preset") >= 0)
             Qt.callLater(root.refreshPresets);
@@ -414,11 +412,6 @@ PluginComponent {
         } else {
             root.cam = next;
         }
-        // Only on a real asleep -> awake change seen in events, not on the first state after a DMS
-        // start, and only by the one instance that holds `wakeSender`. With `wake_mode` the camera
-        // has its own start mode (Sleep card) and this old setting is not applied.
-        if (was === true && next.status?.asleep === false && root.wakeTrackingMode !== "" && !root.has("wake_mode") && root.wakeSender === root.wakeToken)
-            root.send(["tracking", root.wakeTrackingMode]);
         const mode = next.status?.ai_mode;
         if (mode && mode !== "static" && mode !== root.lastTrackingMode)
             root.pluginService?.savePluginData(root.pluginId, "lastTrackingMode", mode);
@@ -608,7 +601,6 @@ PluginComponent {
     onAvailableChanged: applyVisibility()
     Component.onCompleted: {
         applyVisibility();
-        claimWake();
     }
 
     // DMS also creates a throw-away instance only to read ccWidgetIcon; it gets no pluginService
@@ -640,21 +632,6 @@ PluginComponent {
     // Retry button: start the watcher again now
     function refresh() {
         watch.refresh();
-    }
-
-    // One instance sends the wake tracking mode: the plugin global variable `wakeSender` holds
-    // the token of a real instance; when it goes away the next one takes over (as PreviewClaim)
-    readonly property string wakeToken: Math.random().toString(36).slice(2)
-    readonly property string wakeSender: PluginService.globalVars[pluginId]?.wakeSender ?? ""
-    function claimWake() {
-        if (realInstance && wakeSender === "")
-            PluginService.setGlobalVar(pluginId, "wakeSender", wakeToken);
-    }
-    onWakeSenderChanged: claimWake()
-    onRealInstanceChanged: claimWake()
-    Component.onDestruction: {
-        if (wakeSender === wakeToken)
-            PluginService.setGlobalVar(pluginId, "wakeSender", "");
     }
 
     // Layout: the left column (preview, framing) is always there, the right one has the tabs

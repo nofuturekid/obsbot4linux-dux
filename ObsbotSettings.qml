@@ -6,24 +6,6 @@ import qs.Modules.Plugins
 PluginSettings {
     pluginId: "obsbot4linuxDux"
 
-    SelectionSetting {
-        settingKey: "wakeTrackingMode"
-        label: "Tracking mode on wake"
-        description: "Applied whenever the camera wakes up. Not used with obsbot4linux 0.10 or newer: set the start mode in the Sleep card instead"
-        options: [
-            { label: "Keep current", value: "" },
-            { label: "Static", value: "static" },
-            { label: "Normal Tracking", value: "normal" },
-            { label: "Upper Body", value: "upper-body" },
-            { label: "Close-up", value: "close-up" },
-            { label: "Headless", value: "headless" },
-            { label: "Lower Body", value: "lower-body" },
-            { label: "Hand", value: "hand" },
-            { label: "Group", value: "group" }
-        ]
-        defaultValue: ""
-    }
-
     ToggleSetting {
         settingKey: "hideWithoutCamera"
         label: "Hide the bar icon without a camera"

@@ -44,13 +44,23 @@ SectionCard {
         onSelected: index => section.ctl.send(["sleep-background", section.backgrounds[index].toLowerCase()], "Setting sleep background to " + section.backgrounds[index], { status: { sleep_background: section.backgrounds[index].toLowerCase() } })
     }
 
-    // What the camera does when it wakes up, stored in the camera: also without the widget running
+    // Stored in the camera and used when it powers on (plugged in), also without the widget running.
+    // Waking from sleep, by command or by an app's stream, does not apply them (measured, #75)
+    StyledText {
+        width: parent.width
+        visible: section.ctl.has("wake_zoom") || section.ctl.has("wake_mode")
+        wrapMode: Text.WordWrap
+        text: "Power-on settings: waking from sleep does not apply them."
+        color: Theme.surfaceVariantText
+        font.pixelSize: Theme.fontSizeSmall
+    }
+
     LabeledSlider {
         width: parent.width
         visible: section.ctl.has("wake_zoom")
         enabled: section.ctl.status.wake_up_zoom_percent !== undefined
         opacity: enabled ? 1 : 0.38
-        label: "Wake-up zoom"
+        label: "Zoom at power-on"
         // hundredths: percent p is 1 + 3 * p / 100
         minimum: 100
         maximum: 400
@@ -63,7 +73,7 @@ SectionCard {
         id: wakeModeRow
         width: parent.width
         visible: section.ctl.has("wake_mode")
-        label: "Start mode on wake"
+        label: "Tracking mode at power-on"
         stacked: true
         options: section.ctl.trackingModes.map(m => m.label)
         currentIndex: section.ctl.wakeModeIndex()

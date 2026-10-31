@@ -57,7 +57,7 @@ goes to its default tab, ordered by its place in the old column.
   position) unless "Follow new targets" is on, then the camera waits for the next person
 - picture: HDR, exposure Global / Face / Custom (exposure time and gain)
 - camera: field of view, status LED and LED blink (the camera cannot report it, the switch shows the last value set here), mirror, invert; read-only firmware, anti-flicker, frame rate, digital zoom
-- sleep: auto-sleep and the picture while asleep; wake-up zoom and the start mode on wake, stored in the camera (obsbot4linux 0.10; the old "Tracking mode on wake" setting is then not applied)
+- sleep: auto-sleep and the picture while asleep; zoom and tracking mode at power-on, stored in the camera (obsbot4linux 0.10; the camera applies them when it is powered on, not when it wakes from sleep)
 - image adjustments: brightness, contrast, saturation, sharpness, backlight
   compensation, reset to defaults
 - audio: noise reduction, pickup distance, microphone volume, automatic gain, microphone while asleep

@@ -15,7 +15,17 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
   preview opens on demand in place of the panel, with a slim hover overlay (mode chips, zoom − / +,
   Close preview); closing it frees the camera (#83).
 
+### Removed
+
+- The "Tracking mode on wake" setting and the code that applied a mode whenever the camera woke from
+  sleep: the widget no longer overrides the camera. A stored `wakeTrackingMode` value stays unused in
+  the settings file (#75).
+
 ### Changed
+
+- Sleep card: "Wake-up zoom" and "Start mode on wake" are now "Zoom at power-on" and "Tracking mode at
+  power-on", with a hint that the camera applies them at power-on only, not when it wakes from sleep
+  (measured on a Tiny 2 Lite) (#75).
 
 - Gestures card: Direction change is disabled (still showing the camera's value) while Dynamic zoom is
   off, since it only reverses Dynamic zoom's direction, and has a description saying so (#81).
