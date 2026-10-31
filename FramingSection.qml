@@ -7,6 +7,7 @@ SectionCard {
     id: section
 
     property var ctl
+    readonly property var startPose: ctl.cam.state?.startup ?? null
 
     title: "Framing"
     enabled: ctl.live || arranging
@@ -110,5 +111,33 @@ SectionCard {
         value: Math.round(section.ctl.zoomFactor * 100)
         formatValue: v => (v / 100).toFixed(2) + "×"
         onMoved: value => section.ctl.setZoom(value / 100)
+    }
+
+    // The pose the camera takes at power-on; shown only when obsbot4linux reports it
+    Flow {
+        width: parent.width
+        spacing: Theme.spacingS
+        visible: section.ctl.has("startup")
+
+        DButton {
+            text: "Use current pose as start pose"
+            iconName: "flag"
+            onClicked: section.ctl.send(["startup", "set", "--current"], "Setting the start pose")
+        }
+
+        DButton {
+            text: "Go to start pose"
+            iconName: "start"
+            onClicked: section.ctl.send(["startup", "go"], "Moving to the start pose")
+        }
+    }
+
+    StyledText {
+        width: parent.width
+        visible: section.ctl.has("startup") && section.startPose !== null
+        wrapMode: Text.WordWrap
+        text: section.startPose ? "Start pose: pan " + section.ctl.degrees(section.startPose.pan) + " · tilt " + section.ctl.degrees(section.startPose.tilt) + " · zoom " + Number(section.startPose.zoom).toFixed(2) + "×" : ""
+        color: Theme.surfaceVariantText
+        font.pixelSize: Theme.fontSizeSmall
     }
 }

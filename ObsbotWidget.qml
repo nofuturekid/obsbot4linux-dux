@@ -218,7 +218,7 @@ PluginComponent {
         { id: "device", text: "Device", icon: "settings" }
     ]
     readonly property var defaultTabs: ({
-            tracking: ["tracking", "zone"],
+            tracking: ["tracking", "zone", "presets"],
             picture: ["picture", "image"],
             device: ["camera", "sleep", "audio", "gestures", "reset"]
         })
@@ -343,6 +343,19 @@ PluginComponent {
     function handleReply(msg) {
         if (msg.id === root.pendingId)
             root.pendingLabel = "";
+        if (msg.id === root.presetListId && msg.ok !== false) {
+            // [{slot, name, pose: {pan, tilt, zoom}}], the slots in use
+            const list = msg.result?.value;
+            if (Array.isArray(list))
+                root.presets = list;
+        }
+        if (root.presetOps[msg.id]) {
+            const rest = Object.assign({}, root.presetOps);
+            delete rest[msg.id];
+            root.presetOps = rest;
+            if (msg.ok !== false)
+                root.refreshPresets();
+        }
         if (msg.ok === false) {
             // the optimistic change of this request did not happen; the state is rebuilt
             // from the last event and the changes still in flight, the dragged sliders stay
@@ -420,6 +433,26 @@ PluginComponent {
     function factoryReset() {
         root.previewOn = false;
         root.send(["factory-reset", "--yes"], "Resetting to factory settings");
+    }
+
+    // Presets stored in the camera: null until `preset list` has answered. They are not part of
+    // the state events, so the Presets card asks for the list when it needs it and after each change.
+    property var presets: null
+    property int presetListId: 0
+    // Ids of the preset commands in flight; the list is read again when one succeeded
+    property var presetOps: ({})
+
+    function refreshPresets() {
+        if (!watch.running)
+            return;
+        root.presetListId = ++root.requestId;
+        watch.write(root.presetListId, ["preset", "list"]);
+    }
+
+    function presetCommand(args, label) {
+        const id = root.requestId + 1;
+        root.presetOps = Object.assign({}, root.presetOps, { [id]: true });
+        root.send(args, label);
     }
 
     function setExposure(index) {
@@ -517,6 +550,8 @@ PluginComponent {
             root.cam = ({});
             root.truth = ({});
             root.pendingLabel = "";
+            root.presets = null;
+            root.presetOps = ({});
             root.stateRefreshed();
         }
     }
@@ -884,6 +919,19 @@ PluginComponent {
                         controlled: true
                         expanded: root.isOpen("zone")
                         onToggleRequested: root.toggleOpen("zone")
+                    }
+                }
+
+                DelegateChoice {
+                    roleValue: "presets"
+                    PresetsSection {
+                        width: parent.width
+                        cardId: "presets"
+                        arranger: popout
+                        ctl: root
+                        controlled: true
+                        expanded: root.isOpen("presets")
+                        onToggleRequested: root.toggleOpen("presets")
                     }
                 }
 
