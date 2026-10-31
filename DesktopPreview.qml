@@ -20,7 +20,7 @@ DesktopPluginComponent {
     // the widget asks once for the size of its content with requestResize (transient, not saved).
     // Without it the saved size applies.
     readonly property real pictureWidth: 640
-    readonly property real sideWidth: 200
+    readonly property real sideWidth: 220
     readonly property real contentWidth: pictureWidth + sideWidth + Theme.spacingM + Theme.spacingL * 2
     readonly property real defaultWidth: contentWidth
     readonly property real defaultHeight: 520
@@ -175,7 +175,9 @@ DesktopPluginComponent {
         else if (card.implicitHeight > 0)
             requestResize(contentWidth, card.implicitHeight);
     }
+    // DMS sets the two functions one after the other, the size can only be asked for once both are there
     onRequestResizeChanged: applySize()
+    onClearResizeChanged: applySize()
     Component.onCompleted: applySize()
 
     // One preview at a time: starting one in the popout switches this one off and vice versa
@@ -244,7 +246,7 @@ DesktopPluginComponent {
                 }
 
                 DesktopSide {
-                    width: parent.width - frame.width - parent.spacing
+                    width: root.sideWidth
                     height: frame.height
                     ctl: root
                     interactive: !root.editing
