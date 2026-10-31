@@ -99,7 +99,7 @@ Item {
         }
 
         // Three equal slots in slot order; an empty slot leaves its place blank, so a preset keeps
-        // its position and colour (slot 1 primary, 2 secondary, 3 tertiary). Long names are elided
+        // its position. Long names are elided
         // in the button and shown in full as the tooltip.
         Row {
             id: slotRow

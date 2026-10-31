@@ -4,7 +4,8 @@ import qs.DCommon.Widgets
 
 // One of the camera's three preset slots in the desktop widget's bottom row: a recall button with
 // the preset's name (elided, the full name as tooltip), or nothing while the slot is empty so the
-// other slots keep their place. Each slot has its own theme colour: 0 primary, 1 secondary, 2 tertiary.
+// other slots keep their place. All slots share the secondary container colour and none is
+// highlighted: the camera cannot report which preset is active.
 //
 // ctl is the DesktopPreview: presets, recallPreset().
 Item {
@@ -14,11 +15,6 @@ Item {
     property int slotIndex: 0
 
     readonly property var preset: (ctl?.presets ?? []).find(p => p.slot === slotIndex) ?? null
-    readonly property var colors: [
-        { bg: Theme.primaryContainer, fg: Theme.onPrimaryContainer },
-        { bg: Theme.secondaryContainer, fg: Theme.onSecondaryContainer },
-        { bg: Theme.tertiaryContainer, fg: Theme.onTertiaryContainer }
-    ]
 
     DButton {
         visible: slot.preset !== null
@@ -27,8 +23,8 @@ Item {
         maximumWidth: slot.width
         text: slot.preset?.name ?? ""
         tooltipText: slot.preset?.name ?? ""
-        backgroundColor: slot.colors[slot.slotIndex].bg
-        textColor: slot.colors[slot.slotIndex].fg
+        backgroundColor: Theme.secondaryContainer
+        textColor: Theme.onSecondaryContainer
         onClicked: slot.ctl.recallPreset(slot.slotIndex)
     }
 }

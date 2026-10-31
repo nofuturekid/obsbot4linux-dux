@@ -117,8 +117,8 @@ around the picture:
   mode, a red "On air" dot while another app reads the camera, the tracking mode chips and the
   tracking speed chips.
 - **Below the picture:** zoom (slider and − / +) on the left, the presets saved in the camera in the
-  middle (three equal slots in slot order, coloured primary, secondary, tertiary; an empty slot stays
-  blank; long names are elided, the full name is the tooltip; a click recalls one) and **Sleep** / **Wake** at the right end
+  middle (three equal slots in slot order, all in the same colour with no "active" mark, since the camera
+  cannot report the active preset; an empty slot stays blank; long names are elided, the full name is the tooltip; a click recalls one) and **Sleep** / **Wake** at the right end
   (**Retry** when the camera is not reachable). Asleep and offline grey the other controls out.
 
 The height follows the bottom row's content and is not saved; the width is fixed. The preview never
