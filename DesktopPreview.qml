@@ -19,7 +19,6 @@ DesktopPluginComponent {
     // height of its content with requestResize (transient, not saved; only the height changes
     // with the content). Without it the saved size applies.
     readonly property real contentWidth: 340
-    readonly property real pictureHeight: Math.round(contentWidth * 9 / 16)
     readonly property real defaultWidth: contentWidth
     readonly property real defaultHeight: 480
     minWidth: 240
@@ -170,8 +169,8 @@ DesktopPluginComponent {
             return;
         if (editing)
             clearResize();
-        else if (panel.implicitHeight > 0)
-            requestResize(contentWidth, pictureHeight + panel.implicitHeight);
+        else if (card.implicitHeight > 0)
+            requestResize(contentWidth, card.implicitHeight);
     }
     onRequestResizeChanged: applySize()
     Component.onCompleted: applySize()
@@ -200,35 +199,49 @@ DesktopPluginComponent {
         }
     }
 
-    PreviewFrame {
-        id: frame
-        x: 0
-        y: 0
-        width: parent.width
-        height: Math.round(parent.width * 9 / 16)
-        ctl: root
-        interactive: !root.editing
-        dropBodyWhenTight: true
-
-        // On air while the picture is live (the hover overlay keeps it visible)
-        Rectangle {
-            visible: frame.previewShown
-            width: Theme.spacingM
-            height: width
-            radius: width / 2
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.margins: Theme.spacingS
-            color: Theme.error
-        }
-    }
-
-    DesktopPanel {
-        id: panel
-        y: frame.height
-        width: parent.width
-        ctl: root
-        interactive: !root.editing
+    // One card like the popout's cards: picture area inset at the top, the controls below
+    Rectangle {
+        id: card
+        anchors.fill: parent
+        implicitHeight: content.implicitHeight + Theme.spacingL * 2
+        color: Theme.surfaceContainerHigh
+        radius: Theme.cornerRadius
         onImplicitHeightChanged: root.applySize()
+
+        Column {
+            id: content
+            x: Theme.spacingL
+            y: Theme.spacingL
+            width: card.width - Theme.spacingL * 2
+            spacing: Theme.spacingM
+
+            PreviewFrame {
+                id: frame
+                width: parent.width
+                height: Math.round(width * 9 / 16)
+                ctl: root
+                interactive: !root.editing
+                dropBodyWhenTight: true
+
+                // On air while the picture is live (the hover overlay keeps it visible)
+                Rectangle {
+                    visible: frame.previewShown
+                    width: Theme.spacingM
+                    height: width
+                    radius: width / 2
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: Theme.spacingS
+                    color: Theme.error
+                }
+            }
+
+            DesktopPanel {
+                id: panel
+                width: parent.width
+                ctl: root
+                interactive: !root.editing
+            }
+        }
     }
 }

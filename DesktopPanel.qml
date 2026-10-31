@@ -4,13 +4,14 @@ import qs.DCommon.Widgets
 
 // The desktop widget's control panel, below the picture area: status line with the on-air dot,
 // tracking mode, zoom, the camera's preset slots in use and Sleep / Wake (Retry when the camera is
-// not reachable). The size stays the same when the camera is asleep or offline: the controls grey out.
+// not reachable). It sits in the widget card (DesktopPreview) and has no background of its own.
+// The size stays the same when the camera is asleep or offline: the controls grey out.
 //
 // ctl is the DesktopPreview: available, toolMissing, awake, live, streaming, aiMode,
 // trackingModes, status, zoomFactor, zoomRange, presets, presetsFailed,
 // setMode(), setZoom(), stepZoom(), recallPreset(), refreshPresets(), setAwake(), refresh().
 // interactive: false ignores the buttons (desktop edit mode).
-Rectangle {
+Item {
     id: panel
 
     property var ctl
@@ -28,15 +29,11 @@ Rectangle {
         }
     }
 
-    implicitHeight: column.implicitHeight + Theme.spacingL * 2
-    color: Theme.surfaceContainer
-    radius: Theme.cornerRadius
+    implicitHeight: column.implicitHeight
 
     Column {
         id: column
-        x: Theme.spacingL
-        y: Theme.spacingL
-        width: panel.width - Theme.spacingL * 2
+        width: panel.width
         spacing: Theme.spacingM
 
         Item {

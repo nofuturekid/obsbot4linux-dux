@@ -106,7 +106,7 @@ switch says. Hidden cards close up; a tab without cards drops out of the tab bar
 
 The plugin also provides a desktop widget: add **OBSBOT Control** in Settings → Desktop
 Widgets (it is listed next to the other desktop widgets) and place it like any other. Like the
-popout it has one fixed layout, 340 px wide:
+popout it has one fixed layout, a single card 340 px wide:
 
 - **Picture area** (16:9, on top): dark with the "Preview is off" hint and a **Start preview**
   button while the preview is off (or Wake camera / Retry when the camera is asleep or not
