@@ -114,11 +114,11 @@ around the picture:
   reachable); the live picture while it runs, with **Stop preview** on hover. Stopping frees the
   camera.
 - **Right of the picture:** status with the camera state (Awake, Asleep, Offline) and the tracking
-  mode, a red "On air" dot while another app reads the camera, the tracking mode chips, and **Sleep** /
-  **Wake** at the bottom (**Retry** when the camera is not reachable).
-- **Below the picture:** zoom (slider and − / +) on the left, the presets saved in the camera on
-  the right (empty slots are not shown; a click recalls one). Asleep and offline grey the controls
-  out.
+  mode, a red "On air" dot while another app reads the camera, the tracking mode chips and the
+  tracking speed chips.
+- **Below the picture:** zoom (slider and − / +) on the left, the presets saved in the camera in the
+  middle (empty slots are not shown; a click recalls one) and **Sleep** / **Wake** at the right end
+  (**Retry** when the camera is not reachable). Asleep and offline grey the other controls out.
 
 The height follows the bottom row's content and is not saved; the width is fixed. The preview never
 starts by itself: while it runs no other app can use the camera, and a small red dot in the

@@ -2,12 +2,13 @@ import QtQuick
 import qs.Common
 import qs.DCommon.Widgets
 
-// Bottom row of the desktop widget card, full card width: zoom (slider with - / +) on the left
-// half, the camera's preset slots in use on the right half. No background; greyed out (not
-// hidden) while the camera is not live, so the card keeps its size.
+// Bottom row of the desktop widget card, full card width: zoom (slider with - / +) on the left,
+// the camera's preset slots in use in the middle, Sleep / Wake at the right end (Retry when the
+// camera is not reachable). No background; zoom and presets are greyed out (not hidden) while the
+// camera is not live, so the card keeps its size.
 //
-// ctl is the DesktopPreview: live, zoomFactor, zoomRange, presets, presetsFailed, has(),
-// setZoom(), stepZoom(), recallPreset(), refreshPresets().
+// ctl is the DesktopPreview: available, awake, live, zoomFactor, zoomRange, presets, presetsFailed,
+// has(), setZoom(), stepZoom(), recallPreset(), refreshPresets(), setAwake(), refresh().
 // interactive: false ignores the buttons (desktop edit mode).
 Item {
     id: bottom
@@ -15,17 +16,33 @@ Item {
     property var ctl
     property bool interactive: true
 
-    readonly property real halfWidth: (width - Theme.spacingL) / 2
+    // what is left of the row besides the Sleep / Wake button, split 1 : 1
+    readonly property real sectionWidth: (width - powerButton.width - Theme.spacingL * 2) / 2
 
-    implicitHeight: Math.max(zoomItem.height, presetsColumn.height)
-    enabled: ctl.live && interactive
-    opacity: ctl.live ? 1 : 0.38
+    implicitHeight: Math.max(zoomItem.height, presetsColumn.height, powerButton.height)
+
+    DButton {
+        id: powerButton
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        enabled: bottom.interactive
+        text: !bottom.ctl.available ? "Retry" : bottom.ctl.awake ? "Sleep" : "Wake"
+        iconName: !bottom.ctl.available ? "refresh" : bottom.ctl.awake ? "bedtime" : "videocam"
+        onClicked: {
+            if (!bottom.ctl.available)
+                bottom.ctl.refresh();
+            else
+                bottom.ctl.setAwake(!bottom.ctl.awake);
+        }
+    }
 
     // Zoom: slider with the value above it, -/+ beside it on the slider's line
     Item {
         id: zoomItem
-        width: bottom.halfWidth
+        width: bottom.sectionWidth
         height: zoomSlider.height
+        enabled: bottom.ctl.live && bottom.interactive
+        opacity: bottom.ctl.live ? 1 : 0.38
 
         DButton {
             id: zoomOut
@@ -67,9 +84,11 @@ Item {
     // Slots in use only; an empty slot has nothing to recall
     Column {
         id: presetsColumn
-        x: bottom.halfWidth + Theme.spacingL
-        width: bottom.halfWidth
+        x: bottom.sectionWidth + Theme.spacingL
+        width: bottom.sectionWidth
         spacing: Theme.spacingS
+        enabled: bottom.ctl.live && bottom.interactive
+        opacity: bottom.ctl.live ? 1 : 0.38
         visible: bottom.ctl.has("preset")
 
         StyledText {

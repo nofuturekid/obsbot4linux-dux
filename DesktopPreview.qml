@@ -76,6 +76,13 @@ DesktopPluginComponent {
         { label: "Hand", arg: "hand", key: "hand" },
         { label: "Group", arg: "group", key: "group" }
     ]
+    // Same as ObsbotWidget.speeds (`obsbot4linux speed <arg>`); Headroom needs obsbot4linux 0.11
+    readonly property var speeds: [
+        { label: "Standard", arg: "standard" },
+        { label: "Headroom", arg: "headroom", needs: "speed_headroom" },
+        { label: "Sport", arg: "sport" }
+    ]
+    readonly property var speedOptions: speeds.filter(s => !s.needs || has(s.needs))
     readonly property var status: cam.status ?? ({})
     readonly property string aiMode: trackingModes.find(m => m.key === status.ai_mode)?.label ?? ""
     readonly property real zoomFactor: cam.zoom?.factor ?? 1
@@ -104,6 +111,10 @@ DesktopPluginComponent {
 
     function setMode(index) {
         root.send(["tracking", root.trackingModes[index].arg]);
+    }
+
+    function setSpeed(index) {
+        root.send(["speed", root.speedOptions[index].arg]);
     }
 
     function setZoom(factor) {

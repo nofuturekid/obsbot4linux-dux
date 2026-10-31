@@ -3,13 +3,12 @@ import qs.Common
 import qs.DCommon.Widgets
 
 // Right column of the desktop widget card, as high as the picture: status line with the on-air
-// dot, tracking mode chips, and Sleep / Wake at the bottom (Retry when the camera is not
-// reachable). It has no background; the controls grey out (not hide) when the camera is asleep or
-// offline.
+// dot, tracking mode chips and tracking speed chips. It has no background; the controls grey
+// out (not hide) when the camera is asleep or offline.
 //
 // ctl is the DesktopPreview: available, toolMissing, awake, live, streaming, aiMode,
-// trackingModes, status, setMode(), setAwake(), refresh().
-// interactive: false ignores the buttons (desktop edit mode).
+// trackingModes, speedOptions, status, setMode(), setSpeed().
+// interactive: false ignores the chips (desktop edit mode).
 Item {
     id: side
 
@@ -25,6 +24,7 @@ Item {
         target: side.ctl
         function onCamChanged() {
             modeRow.sync();
+            speedRow.sync();
         }
     }
 
@@ -99,17 +99,18 @@ Item {
         onSelected: index => side.ctl.setMode(index)
     }
 
-    DButton {
-        anchors.bottom: parent.bottom
+    ChipRow {
+        id: speedRow
+        anchors.top: modeRow.bottom
+        anchors.topMargin: Theme.spacingM
+        anchors.left: parent.left
         anchors.right: parent.right
-        enabled: side.interactive
-        text: !side.ctl.available ? "Retry" : side.ctl.awake ? "Sleep" : "Wake"
-        iconName: !side.ctl.available ? "refresh" : side.ctl.awake ? "bedtime" : "videocam"
-        onClicked: {
-            if (!side.ctl.available)
-                side.ctl.refresh();
-            else
-                side.ctl.setAwake(!side.ctl.awake);
-        }
+        stacked: true
+        label: "Tracking speed"
+        enabled: side.usable
+        opacity: side.ctl.live ? 1 : 0.38
+        options: side.ctl.speedOptions.map(m => m.label)
+        currentIndex: side.ctl.live ? side.ctl.speedOptions.findIndex(m => m.arg === side.ctl.status.tracking_speed) : -1
+        onSelected: index => side.ctl.setSpeed(index)
     }
 }
