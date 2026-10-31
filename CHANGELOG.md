@@ -8,6 +8,8 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-10-31
+
 ### Added
 
 - Zone card: zone views (obsbot4linux 0.12, `zone_views`): the camera's named poses with Go, Rename
