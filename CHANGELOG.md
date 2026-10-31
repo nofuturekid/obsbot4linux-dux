@@ -8,6 +8,8 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-10-31
+
 ### Fixed
 
 - Desktop widget: Sleep / Wake, the tracking mode and speed chips and zoom react at once instead of
