@@ -1,9 +1,10 @@
 import QtQuick
 import qs.Common
+import qs.DCommon.Common
 import qs.DCommon.Widgets
 
 // Bottom row of the desktop widget card, full card width: zoom (slider with - / +) on the left,
-// the camera's preset slots in use in the middle, Sleep / Wake at the right end (Retry when the
+// the camera's three preset slots in the middle, Sleep / Wake at the right end (Retry when the
 // camera is not reachable). No background; zoom and presets are greyed out (not hidden) while the
 // camera is not live, so the card keeps its size.
 //
@@ -97,20 +98,46 @@ Item {
             font.pixelSize: Theme.fontSizeSmall
         }
 
-        Flow {
+        // Three equal slots in slot order; an empty slot leaves its place blank, so a preset keeps
+        // its position and colour (slot 1 primary, 2 secondary, 3 tertiary). Long names are elided
+        // in the button and shown in full as the tooltip.
+        Row {
+            id: slotRow
             width: parent.width
+            height: Style.buttonHeightS
             spacing: Theme.spacingS
             visible: (bottom.ctl.presets?.length ?? 0) > 0
 
-            Repeater {
-                model: bottom.ctl.presets ?? []
+            readonly property real slotWidth: (width - spacing * 2) / 3
+            readonly property var slotColors: [
+                { bg: Theme.primaryContainer, fg: Theme.onPrimaryContainer },
+                { bg: Theme.secondaryContainer, fg: Theme.onSecondaryContainer },
+                { bg: Theme.tertiaryContainer, fg: Theme.onTertiaryContainer }
+            ]
 
-                delegate: DButton {
-                    required property var modelData
-                    text: modelData.name
-                    iconName: "my_location"
-                    maximumWidth: presetsColumn.width
-                    onClicked: bottom.ctl.recallPreset(modelData.slot)
+            Repeater {
+                    model: [0, 1, 2]
+
+                delegate: Item {
+                    id: slotItem
+
+                    required property int modelData
+                    readonly property var preset: (bottom.ctl.presets ?? []).find(p => p.slot === modelData) ?? null
+
+                    width: slotRow.slotWidth
+                    height: slotRow.height
+
+                    DButton {
+                        visible: slotItem.preset !== null
+                        width: parent.width
+                        minimumWidth: 0
+                        maximumWidth: slotRow.slotWidth
+                        text: slotItem.preset?.name ?? ""
+                        tooltipText: slotItem.preset?.name ?? ""
+                        backgroundColor: slotRow.slotColors[slotItem.modelData].bg
+                        textColor: slotRow.slotColors[slotItem.modelData].fg
+                        onClicked: bottom.ctl.recallPreset(slotItem.modelData)
+                    }
                 }
             }
         }
