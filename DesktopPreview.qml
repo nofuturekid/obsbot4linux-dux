@@ -60,6 +60,7 @@ DesktopPluginComponent {
     onEditingChanged: {
         if (editing)
             previewOn = false;
+        applySize();
     }
 
     // Same keys and arguments as ObsbotWidget.trackingModes (`obsbot4linux tracking <arg>`)
@@ -177,7 +178,6 @@ DesktopPluginComponent {
             requestResize(panelWidth, panel.implicitHeight);
     }
     onPreviewShownChanged: applySize()
-    onEditingChanged: applySize()
     onRequestResizeChanged: applySize()
     Component.onCompleted: applySize()
 
