@@ -43,7 +43,7 @@ goes to its default tab, ordered by its place in the old column.
   area; obsbot4linux 0.7.3 or later); "searching" in the status while it has lost
   its target; optionally the tracked target's box over the preview (popout and
   desktop widget)
-- framing: pan/tilt d-pad with live pose and fine steps, center, zoom; the left and
+- framing: pan/tilt d-pad with live pose and a 5°/1° step switch, center, zoom beside it; the left and
   right arrows follow the picture (flipped while mirror is on); a manual
   move switches tracking to Static; "Use current pose as start pose" and "Go to start pose"
   (the pose the camera takes at power-on), with the stored start pose shown when obsbot4linux

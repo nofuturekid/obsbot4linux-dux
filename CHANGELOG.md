@@ -8,6 +8,12 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+### Changed
+
+- Framing card: the pose readout, a 5°/1° step switch (replacing the Fine steps row) and the Zoom
+  slider now sit beside the d-pad; on a popout too narrow for both they go below it. The start
+  pose is one compact row with "Use current" and "Go" and the stored pose (#33).
+
 ### Added
 
 - Tracking card: hand tracking return position. While Hand is the tracking mode, "Return here",

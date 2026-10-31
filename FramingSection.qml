@@ -13,7 +13,9 @@ SectionCard {
     enabled: ctl.live || arranging
     opacity: ctl.live || arranging ? 1 : 0.38
 
-    Row {
+    // D-pad and side panel; the panel drops below the pad when the popout is too narrow for both
+    Flow {
+        id: moveZoom
         width: parent.width
         spacing: Theme.spacingL
 
@@ -73,9 +75,11 @@ SectionCard {
         }
 
         Column {
-            width: parent.width - dpad.width - parent.spacing
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Theme.spacingXS
+            // beside the pad while at least sideMin wide, else full width under it
+            readonly property real sideMin: Theme.spacingXL * 6
+            readonly property real beside: moveZoom.width - dpad.width - moveZoom.spacing
+            width: beside >= sideMin ? beside : moveZoom.width
+            spacing: Theme.spacingS
 
             StyledText {
                 text: "Pan " + section.ctl.degrees(section.ctl.pan) + " · Tilt " + section.ctl.degrees(section.ctl.tilt)
@@ -84,60 +88,87 @@ SectionCard {
                 font.features: { "tnum": 1 }
             }
 
-            StyledText {
+            ChipRow {
+                id: stepRow
                 width: parent.width
-                wrapMode: Text.WordWrap
-                text: section.ctl.gimbalStep + "° per step. Moving switches tracking to Static."
-                color: Theme.surfaceVariantText
-                font.pixelSize: Theme.fontSizeSmall
+                label: "Step"
+                options: ["5°", "1°"]
+                currentIndex: section.ctl.fineGimbal ? 1 : 0
+                onSelected: index => section.ctl.fineGimbal = index === 1
             }
-        }
-    }
 
-    ToggleRow {
-        width: parent.width
-        label: "Fine steps"
-        description: "1° per click instead of 5°"
-        checked: section.ctl.fineGimbal
-        onToggled: checked => section.ctl.fineGimbal = checked
-    }
-
-    LabeledSlider {
-        width: parent.width
-        label: "Zoom"
-        // hundredths, so the field of view levels (1.15×, 1.47×) show exactly
-        minimum: Math.round(section.ctl.zoomRange[0] * 100)
-        maximum: Math.round(section.ctl.zoomRange[1] * 100)
-        value: Math.round(section.ctl.zoomFactor * 100)
-        formatValue: v => (v / 100).toFixed(2) + "×"
-        onMoved: value => section.ctl.setZoom(value / 100)
-    }
-
-    // The pose the camera takes at power-on; shown only when obsbot4linux reports it
-    Flow {
-        width: parent.width
-        spacing: Theme.spacingS
-        visible: section.ctl.has("startup")
-
-        DButton {
-            text: "Use current pose as start pose"
-            iconName: "flag"
-            onClicked: section.ctl.send(["startup", "set", "--current"], "Setting the start pose")
-        }
-
-        DButton {
-            text: "Go to start pose"
-            iconName: "start"
-            onClicked: section.ctl.send(["startup", "go"], "Moving to the start pose")
+            LabeledSlider {
+                width: parent.width
+                label: "Zoom"
+                // hundredths, so the field of view levels (1.15×, 1.47×) show exactly
+                minimum: Math.round(section.ctl.zoomRange[0] * 100)
+                maximum: Math.round(section.ctl.zoomRange[1] * 100)
+                value: Math.round(section.ctl.zoomFactor * 100)
+                formatValue: v => (v / 100).toFixed(2) + "×"
+                onMoved: value => section.ctl.setZoom(value / 100)
+            }
         }
     }
 
     StyledText {
         width: parent.width
-        visible: section.ctl.has("startup") && section.startPose !== null
         wrapMode: Text.WordWrap
-        text: section.startPose ? "Start pose: pan " + section.ctl.degrees(section.startPose.pan) + " · tilt " + section.ctl.degrees(section.startPose.tilt) + " · zoom " + Number(section.startPose.zoom).toFixed(2) + "×" : ""
+        text: "Moving switches tracking to Static."
         color: Theme.surfaceVariantText
         font.pixelSize: Theme.fontSizeSmall
+    }
+
+    Connections {
+        target: section.ctl
+        function onFineGimbalChanged() {
+            stepRow.sync();
+        }
+    }
+
+    // The pose the camera takes at power-on; shown only when obsbot4linux reports it
+    Item {
+        width: parent.width
+        height: startRow.height
+        visible: section.ctl.has("startup")
+
+        Column {
+            anchors.left: parent.left
+            anchors.right: startRow.left
+            anchors.rightMargin: Theme.spacingM
+            anchors.verticalCenter: parent.verticalCenter
+
+            StyledText {
+                text: "Start pose"
+                color: Theme.surfaceText
+                font.pixelSize: Theme.fontSizeSmall
+            }
+
+            StyledText {
+                width: parent.width
+                visible: section.startPose !== null
+                wrapMode: Text.WordWrap
+                text: section.startPose ? "pan " + section.ctl.degrees(section.startPose.pan) + " · tilt " + section.ctl.degrees(section.startPose.tilt) + " · zoom " + Number(section.startPose.zoom).toFixed(2) + "×" : ""
+                color: Theme.surfaceVariantText
+                font.pixelSize: Theme.fontSizeSmall
+            }
+        }
+
+        Row {
+            id: startRow
+            anchors.right: parent.right
+            spacing: Theme.spacingS
+
+            DButton {
+                text: "Use current"
+                iconName: "flag"
+                onClicked: section.ctl.send(["startup", "set", "--current"], "Setting the start pose")
+            }
+
+            DButton {
+                text: "Go"
+                iconName: "start"
+                onClicked: section.ctl.send(["startup", "go"], "Moving to the start pose")
+            }
+        }
     }
 }
