@@ -17,6 +17,22 @@ SectionCard {
         return f.charAt(0).toUpperCase() + f.slice(1);
     }
 
+    // Read-only info lines; a line shows only when obsbot4linux reports the field.
+    // anti_flicker is a string since obsbot4linux 0.9.0, a number before (same order).
+    function antiFlicker() {
+        const a = ctl.status.anti_flicker;
+        const names = ["off", "50 Hz", "60 Hz", "auto"];
+        if (typeof a === "number")
+            return names[a] ?? "";
+        return a === undefined ? "" : (names.find(n => n.replace(" ", "").toLowerCase() === String(a).toLowerCase()) ?? String(a));
+    }
+
+    function percent(v) {
+        return v === undefined || v === null ? "" : v + " %";
+    }
+
+    readonly property var infoLines: [["Firmware", ctl.cam.firmware ?? ""], ["Anti-flicker", antiFlicker()], ["Frame rate", ctl.status.frame_rate !== undefined ? ctl.status.frame_rate + " fps" : ""], ["Digital zoom", percent(ctl.status.digital_zoom_percent)], ["Wake-up zoom", percent(ctl.status.wake_up_zoom_percent)]].filter(l => l[1] !== "")
+
     title: "Camera"
     collapsible: true
     expanded: false
@@ -64,6 +80,15 @@ SectionCard {
         description: "Reverses left/right panning"
         checked: section.ctl.tracking.invert === true
         onToggled: checked => section.ctl.send(["invert", checked ? "on" : "off"], checked ? "Inverting gimbal" : "Restoring gimbal direction", { tracking: { invert: checked } })
+    }
+
+    StyledText {
+        width: parent.width
+        visible: section.infoLines.length > 0
+        wrapMode: Text.WordWrap
+        text: section.infoLines.map(l => l[0] + ": " + l[1]).join(" · ")
+        color: Theme.surfaceVariantText
+        font.pixelSize: Theme.fontSizeSmall
     }
 
     // A click assigns currentIndex and breaks the binding; re-sync to the camera state

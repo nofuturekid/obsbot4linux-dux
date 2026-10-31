@@ -55,7 +55,7 @@ goes to its default tab, ordered by its place in the old column.
   position", all read back from the camera. Leaving the area stops tracking (Static, back to the return
   position) unless "Follow new targets" is on, then the camera waits for the next person
 - picture: HDR, exposure Global / Face / Custom (exposure time and gain)
-- camera: field of view, status LED, mirror, invert
+- camera: field of view, status LED, mirror, invert; read-only firmware, anti-flicker, frame rate, digital zoom
 - sleep: auto-sleep and the picture while asleep
 - image adjustments: brightness, contrast, saturation, sharpness, backlight
   compensation, reset to defaults
