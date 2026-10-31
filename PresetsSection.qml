@@ -86,7 +86,7 @@ SectionCard {
                 width: parent.width
                 wrapMode: Text.WordWrap
                 visible: !row.confirmingDelete
-                text: row.preset ? section.poseText(row.preset) : (section.ctl.presets === null ? "Reading presets..." : "Empty")
+                text: row.preset ? section.poseText(row.preset) : (section.ctl.presets === null ? (section.ctl.presetsFailed ? "Could not read the presets" : "Reading presets...") : "Empty")
                 color: Theme.surfaceVariantText
                 font.pixelSize: Theme.fontSizeSmall
                 font.features: { "tnum": 1 }
@@ -216,5 +216,12 @@ SectionCard {
         id: cancelTimer
         interval: 10000
         onTriggered: section.deleting = -1
+    }
+
+    DButton {
+        visible: section.ctl.presetsFailed
+        text: "Retry reading presets"
+        iconName: "refresh"
+        onClicked: section.ctl.refreshPresets()
     }
 }
