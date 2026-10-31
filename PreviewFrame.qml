@@ -24,13 +24,15 @@ ClippingRectangle {
     // Without qt6-multimedia PreviewVideo.qml fails to load; the frame then says so
     readonly property bool videoMissing: videoLoader.status === Loader.Error
     readonly property bool previewShown: ctl.previewOn && ctl.live && !videoMissing
-    readonly property bool overlayShown: !previewShown || (interactive && frameHover.hovered)
+    // With click-to-focus the running picture stays free of the big hint (it would be in the way of
+    // clicks); only the small stop button shows on hover
+    readonly property bool overlayShown: !previewShown || (interactive && frameHover.hovered && !focusClick)
     readonly property bool focusClick: previewShown && interactive && (ctl.canFocusPoint ?? false)
     // The video is 16:9 and fitted inside the frame (PreserveAspectFit): bars at the sides or top
     readonly property real videoWidth: Math.min(width, height * 16 / 9)
     readonly property real videoHeight: videoWidth * 9 / 16
     readonly property var hint: previewShown
-        ? { icon: "visibility", title: "Preview is on", body: "No other app can use the camera while it's on. Stop it before a call." + (focusClick ? " Click the picture to focus on that spot." : ""), button: "Stop preview", buttonIcon: "stop" }
+        ? { icon: "visibility", title: "Preview is on", body: "No other app can use the camera while it's on. Stop it before a call.", button: "Stop preview", buttonIcon: "stop" }
         : !ctl.available
         ? (ctl.toolMissing
             ? { icon: "terminal", title: "Control tool not found", body: "obsbot4linux could not be run. Check that it is installed and on PATH.", button: "Retry", buttonIcon: "refresh" }
@@ -118,12 +120,12 @@ ClippingRectangle {
 
     // Click on the picture -> focus point, normalised to the video (not the frame, so the bars of
     // a letterboxed frame are ignored). Not mirrored or flipped here: with mirror or invert on the
-    // firmware's coordinates are untested. The overlay's own button keeps its click.
+    // firmware's coordinates are untested. The stop button keeps its click.
     TapHandler {
         enabled: frame.focusClick
         onTapped: eventPoint => {
             const p = eventPoint.position;
-            if (button.visible && button.contains(button.mapFromItem(frame, p.x, p.y)))
+            if (stopButton.visible && stopButton.contains(stopButton.mapFromItem(frame, p.x, p.y)))
                 return;
             const x = (p.x - (frame.width - frame.videoWidth) / 2) / frame.videoWidth;
             const y = (p.y - (frame.height - frame.videoHeight) / 2) / frame.videoHeight;
@@ -134,6 +136,18 @@ ClippingRectangle {
             focusMark.y = p.y - focusMark.height / 2;
             focusMarkFade.restart();
         }
+    }
+
+    // Replaces the hint's stop button while the picture is clickable
+    DButton {
+        id: stopButton
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.margins: Theme.spacingS
+        visible: frame.focusClick && frameHover.hovered
+        text: "Stop preview"
+        iconName: "stop"
+        onClicked: frame.hintAction()
     }
 
     // Shows for a moment where the click went

@@ -546,6 +546,12 @@ PluginComponent {
         root.send(["focus", "af", afModes[index]], "Setting autofocus to " + afModes[index], { focus: { mode: afModes[index] } });
     }
 
+    // `focus set` turns the UVC autofocus off and writes focus_absolute; `image focus` alone is
+    // refused by the camera because UVC autofocus stays on even in its manual AF mode
+    function setManualFocus(value) {
+        root.send(["focus", "set", value], "", { image: { focus: value, autofocus: 0 } }, true);
+    }
+
     // Click on the preview: x, y 0..1 from the top left of the picture
     readonly property bool canFocusPoint: has("focus_point") && awake
     function focusAt(x, y) {

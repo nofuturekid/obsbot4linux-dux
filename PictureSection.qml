@@ -66,7 +66,7 @@ SectionCard {
         onSelected: index => section.ctl.setAfMode(index)
     }
 
-    // The UVC focus position, effective in manual mode
+    // The UVC focus position (image.focus, what `focus set` writes), effective in manual mode
     LabeledSlider {
         width: parent.width
         visible: section.ctl.has("focus_af_mode") && section.ctl.image.focus !== undefined
@@ -76,7 +76,7 @@ SectionCard {
         minimum: section.ctl.image.focus?.min ?? 0
         maximum: section.ctl.image.focus?.max ?? 100
         value: section.ctl.image.focus?.value ?? 0
-        onMoved: value => section.ctl.setControl("focus", value)
+        onMoved: value => section.ctl.setManualFocus(value)
     }
 
     // A click assigns currentIndex and breaks the binding; re-sync to the camera state
