@@ -35,8 +35,9 @@ DesktopPluginComponent {
     // Set by DMS (DesktopWidgetContent) when the component declares it; for the log
     property var screen: null
 
-    // Camera state from obsbot4linux watch, same fields as the popout reads
-    property var cam: ({})
+    // Camera state from obsbot4linux watch, same fields as the popout reads, with the changes sent
+    // but not yet confirmed by an event on top (OptimisticState, like the popout)
+    property alias cam: optimistic.cam
     // The bar widget's "Show target box" switch (a global plugin setting, not this instance's).
     // SettingsData replaces pluginSettings on every save, so the binding follows at once.
     readonly property bool showTargetBox: SettingsData.pluginSettings[pluginId]?.showTargetBox ?? false
@@ -96,10 +97,15 @@ DesktopPluginComponent {
         return (cam.capabilities ?? []).indexOf(name) >= 0;
     }
 
-    // Sends `obsbot4linux <args>`; the answer is the next state event, errors are shown by the watcher
-    function send(args) {
-        if (watch.running)
-            watch.write(++root.requestId, args);
+    // Sends `obsbot4linux <args>` and flips the UI to `changes` at once; the next state event
+    // confirms it, errors are shown by the watcher
+    function send(args, changes) {
+        if (!watch.running)
+            return;
+        const id = ++root.requestId;
+        if (changes)
+            optimistic.change(id, changes);
+        watch.write(id, args);
     }
 
     function setAwake(on) {
@@ -107,20 +113,22 @@ DesktopPluginComponent {
             return;
         if (!on)
             previewOn = false;
-        root.send([on ? "wake" : "sleep"]);
+        root.send([on ? "wake" : "sleep"], { status: { asleep: !on } });
     }
 
     function setMode(index) {
-        root.send(["tracking", root.trackingModes[index].arg]);
+        const mode = root.trackingModes[index];
+        root.send(["tracking", mode.arg], { status: { ai_mode: mode.key } });
     }
 
     function setSpeed(index) {
-        root.send(["speed", root.speedOptions[index].arg]);
+        const speed = root.speedOptions[index];
+        root.send(["speed", speed.arg], { status: { tracking_speed: speed.arg } });
     }
 
     function setZoom(factor) {
         const next = Math.max(root.zoomRange[0], Math.min(root.zoomRange[1], Math.round(factor * 100) / 100));
-        root.send(["zoom", next.toFixed(2)]);
+        root.send(["zoom", next.toFixed(2)], { zoom: { factor: next } });
     }
 
     // The +/- buttons: 0.5 per click within the range
@@ -157,6 +165,9 @@ DesktopPluginComponent {
     }
 
     function handleReply(msg) {
+        // the optimistic change of this request did not happen
+        if (msg.ok === false)
+            optimistic.fail(msg.id);
         if (msg.id !== root.presetListId)
             return;
         root.presetListId = 0;
@@ -208,16 +219,20 @@ DesktopPluginComponent {
         onDisplaced: root.previewOn = false
     }
 
+    OptimisticState {
+        id: optimistic
+    }
+
     // Errors are logged and shown as a toast by the watcher
     CameraWatch {
         id: watch
         active: true
         instanceName: "desktop widget" + (root.screen?.name ? " on screen " + root.screen.name : "")
         device: root.device
-        onStateEvent: next => root.cam = next
+        onStateEvent: next => optimistic.receive(next)
         onReply: msg => root.handleReply(msg)
         onStopped: {
-            root.cam = ({});
+            optimistic.reset();
             root.listedPresets = null;
             root.presetListId = 0;
             root.presetsFailed = false;

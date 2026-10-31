@@ -14,7 +14,7 @@ PluginComponent {
     // One long-running `obsbot4linux watch` is the only link to the camera: its state events are the
     // only source of truth, commands are requests on its stdin. The UI patches `cam`
     // optimistically when a command goes out; the patch stays until an event shows its value or
-    // patchTimeout has passed (#89).
+    // patchTimeout has passed (#89, see OptimisticState).
 
     // key = ai_mode in obsbot4linux's state, arg = `obsbot4linux tracking <arg>`
     // main/sub: the mode/sub-mode pair obsbot4linux reads back as status.default_work_mode
@@ -74,17 +74,8 @@ PluginComponent {
         { name: "backlight_compensation", label: "Backlight compensation" }
     ]
 
-    // The state object of the last event, with optimistic patches on top
-    property var cam: ({})
-    property var truth: ({})
-    // The optimistic changes not yet confirmed by an event, by request id: { changes, at }. A
-    // failed request takes back only its own; a later change of the same value replaces it.
-    property var patches: ({})
-    // An event right after a command can still carry the old value (obsbot4linux up to 0.13.1
-    // sends one with old zone, hand, image and zoom values; a full read running when the
-    // command came in has not seen it). A value the camera stores differently from what was
-    // sent never confirms; it shows the camera's value after this long.
-    readonly property int patchTimeout: 3000
+    // The state object of the last event, with optimistic patches on top (OptimisticState)
+    property alias cam: optimistic.cam
     readonly property var status: cam.status ?? ({})
     readonly property var tracking: cam.tracking ?? ({})
     readonly property var image: cam.image ?? ({})
@@ -308,124 +299,24 @@ PluginComponent {
         pluginService?.savePluginData(pluginId, "cardTabs", undefined);
     }
 
-    // changes: { group: { key: value } }; in "image" the value goes into <control>.value
-    function patch(changes) {
-        const s = Object.assign({}, root.cam);
-        for (const group in changes) {
-            // top-level scalars such as audio_volume
-            if (typeof changes[group] !== "object") {
-                s[group] = changes[group];
-                continue;
-            }
-            s[group] = Object.assign({}, s[group]);
-            for (const key in changes[group])
-                s[group][key] = group === "image" ? Object.assign({}, s.image[key], { value: changes[group][key] }) : changes[group][key];
-        }
-        root.cam = s;
-    }
-
     // Sliders: events that arrive while the user is still dragging would pull the handle
     // back, so image and zoom of the state stay as dragged until the drag has rested.
     Timer {
         id: dragHold
         interval: 500
-        onTriggered: root.applyTruth()
+        onTriggered: optimistic.apply()
     }
 
-    Timer {
-        id: patchExpiry
-        interval: root.patchTimeout + 50
-        onTriggered: root.applyTruth()
-    }
-
-    // Whether `state` has `want` (a value from a patch); objects are compared by the keys sent
-    function sameValue(have, want) {
-        if (want === null || want === undefined)
-            return have === null || have === undefined;
-        if (typeof want === "number")
-            return typeof have === "number" && Math.abs(have - want) < 1e-6;
-        if (typeof want === "object") {
-            if (have === null || typeof have !== "object")
-                return false;
-            for (const k in want)
-                if (!root.sameValue(have[k], want[k]))
-                    return false;
-            return true;
+    OptimisticState {
+        id: optimistic
+        onRefreshed: root.stateRefreshed()
+        finish: (previous, next) => {
+            if (!dragHold.running)
+                return next;
+            const held = { image: previous.image, zoom: previous.zoom, audio_volume: previous.audio_volume };
+            held.status = Object.assign({}, next.status, { wake_up_zoom_percent: previous.status?.wake_up_zoom_percent });
+            return Object.assign({}, next, held);
         }
-        return have === want;
-    }
-
-    // The pose is live (it moves with the gimbal); it is never held, only the settings are
-    function confirmed(changes, state) {
-        for (const group in changes) {
-            if (group === "pose")
-                continue;
-            const want = changes[group];
-            if (typeof want !== "object" || want === null) {
-                if (!root.sameValue(state[group], want))
-                    return false;
-                continue;
-            }
-            for (const key in want) {
-                const have = group === "image" ? state.image?.[key]?.value : state[group]?.[key];
-                if (!root.sameValue(have, want[key]))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    // `cam` from the last event and the patches it has not confirmed yet; dragged sliders stay
-    function applyTruth() {
-        const now = Date.now();
-        const keep = {};
-        for (const id in root.patches) {
-            const p = root.patches[id];
-            if (now - p.at < root.patchTimeout && !root.confirmed(p.changes, root.truth))
-                keep[id] = p;
-        }
-        root.patches = keep;
-        const held = dragHold.running ? { image: root.cam.image, zoom: root.cam.zoom, audio_volume: root.cam.audio_volume } : null;
-        const heldWakeZoom = root.cam.status?.wake_up_zoom_percent;
-        root.cam = root.truth;
-        // ids count up, so later changes go on top
-        for (const id in keep) {
-            const changes = Object.assign({}, keep[id].changes);
-            delete changes.pose;
-            root.patch(changes);
-        }
-        if (held) {
-            held.status = Object.assign({}, root.cam.status, { wake_up_zoom_percent: heldWakeZoom });
-            root.cam = Object.assign({}, root.cam, held);
-        }
-        root.stateRefreshed();
-    }
-
-    // A new change of a value replaces the older patches of it: when the event confirms the
-    // older one, the newer one must still show
-    function supersede(changes) {
-        const rest = {};
-        for (const id in root.patches) {
-            const old = Object.assign({}, root.patches[id].changes);
-            for (const group in changes) {
-                if (!(group in old))
-                    continue;
-                if (typeof changes[group] !== "object" || changes[group] === null || typeof old[group] !== "object" || old[group] === null) {
-                    delete old[group];
-                    continue;
-                }
-                const keys = Object.assign({}, old[group]);
-                for (const key in changes[group])
-                    delete keys[key];
-                if (Object.keys(keys).length > 0)
-                    old[group] = keys;
-                else
-                    delete old[group];
-            }
-            if (Object.keys(old).length > 0)
-                rest[id] = { changes: old, at: root.patches[id].at };
-        }
-        return rest;
     }
 
     // Sends `obsbot4linux <args>` and flips the UI to `changes` at once
@@ -433,11 +324,8 @@ PluginComponent {
         if (!watch.running)
             return;
         const id = ++root.requestId;
-        if (changes) {
-            root.patch(changes);
-            root.patches = Object.assign(root.supersede(changes), { [id]: { changes: changes, at: Date.now() } });
-            patchExpiry.restart();
-        }
+        if (changes)
+            optimistic.change(id, changes);
         if (slider)
             dragHold.restart();
         if (label) {
@@ -478,12 +366,8 @@ PluginComponent {
                 root.refreshPresets();
         }
         if (msg.ok === false) {
-            // the optimistic change of this request did not happen; the state is rebuilt
-            // from the last event and the changes still in flight, the dragged sliders stay
-            const rest = Object.assign({}, root.patches);
-            delete rest[msg.id];
-            root.patches = rest;
-            root.applyTruth();
+            // the optimistic change of this request did not happen; the dragged sliders stay
+            optimistic.fail(msg.id);
         }
     }
 
@@ -491,8 +375,7 @@ PluginComponent {
         // The card asked while the watch was not up yet, or before it restarted: read the list now
         if (root.listedPresets === null && !root.has("preset_state") && root.presetsRequested && !root.presetsFailed && Object.keys(root.presetListIds).length === 0 && next.available === true && (next.capabilities ?? []).indexOf("preset") >= 0)
             Qt.callLater(root.refreshPresets);
-        root.truth = next;
-        root.applyTruth();
+        optimistic.receive(next);
         const mode = next.status?.ai_mode;
         if (mode && mode !== "static" && mode !== root.lastTrackingMode)
             root.pluginService?.savePluginData(root.pluginId, "lastTrackingMode", mode);
@@ -717,9 +600,7 @@ PluginComponent {
         onReply: msg => root.handleReply(msg)
         onStopped: {
             root.poseSent = false;
-            root.cam = ({});
-            root.truth = ({});
-            root.patches = ({});
+            optimistic.reset();
             root.pendingLabel = "";
             root.listedPresets = null;
             root.presetListIds = ({});

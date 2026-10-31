@@ -8,6 +8,13 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Desktop widget: Sleep / Wake, the tracking mode and speed chips and zoom react at once instead of
+  after the next state event (1-3 s with obsbot4linux 0.13.2). It now uses the same optimistic
+  values as the popout, held until an event confirms them or 3 s have passed; the mechanism is
+  shared (`OptimisticState.qml`) (#91).
+
 ## [0.26.0] - 2026-10-31
 
 ### Fixed
