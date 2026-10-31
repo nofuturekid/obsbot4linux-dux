@@ -13,7 +13,7 @@ SectionCard {
         { label: "Target lock", arg: "target-lock", key: "target_lock" },
         { label: "Zoom", arg: "zoom", key: "zoom_gesture" },
         { label: "Dynamic zoom", arg: "dynamic-zoom", key: "dynamic_zoom" },
-        { label: "Direction change", arg: "direction-change", key: "direction_change" }
+        { label: "Direction change", arg: "direction-change", key: "direction_change", description: "Reverses which hand movement zooms in or out with Dynamic zoom.", needs: "dynamic_zoom" }
     ]
     readonly property int onCount: gestures.filter(g => ctl.tracking[g.key] === true).length
 
@@ -33,6 +33,10 @@ SectionCard {
             required property var modelData
             width: parent.width
             label: modelData.label
+            description: modelData.description ?? ""
+            // reverses Dynamic zoom's direction, does nothing while that is off; still shows the camera's value
+            enabled: modelData.needs === undefined || section.ctl.tracking[modelData.needs] === true
+            opacity: enabled ? 1 : 0.38
             checked: section.ctl.tracking[modelData.key] === true
             onToggled: checked => section.ctl.send(["gesture", "set", modelData.arg, checked ? "on" : "off"], (checked ? "Turning on " : "Turning off ") + modelData.label.toLowerCase() + " gesture", { tracking: { [modelData.key]: checked } })
         }

@@ -37,7 +37,7 @@ Item {
             text: row.description
             color: Theme.surfaceVariantText
             font.pixelSize: Theme.fontSizeSmall
-            elide: Text.ElideRight
+            wrapMode: Text.WordWrap
         }
     }
 
