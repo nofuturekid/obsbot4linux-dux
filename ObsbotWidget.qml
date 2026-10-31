@@ -351,8 +351,10 @@ PluginComponent {
             root.presetListIds = rest;
             // [{slot, name, pose: {pan, tilt, zoom}}], the slots in use
             const list = msg.result?.value;
-            if (msg.ok !== false && Array.isArray(list)) {
-                root.presets = list;
+            // not Array.isArray: the reply went through a signal, which hands arrays over as
+            // list wrappers that fail it (the cause of "Reading presets..." sticking)
+            if (msg.ok !== false && list && typeof list.length === "number") {
+                root.presets = Array.from(list);
                 root.presetsFailed = false;
                 presetTimeout.stop();
             } else {
