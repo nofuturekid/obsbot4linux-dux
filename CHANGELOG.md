@@ -8,6 +8,13 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Switches, choices and sliders no longer jump back to the old value for a moment after a change.
+  The optimistic value stays until a state event shows it (or 3 s have passed, then the camera's
+  value shows); before, any event dropped it, and obsbot4linux up to 0.13.1 sends one with the old
+  zone, hand, image and zoom values right after each command (obsbot4linux#107) (#89).
+
 ## [0.25.0] - 2026-10-31
 
 ### Added
