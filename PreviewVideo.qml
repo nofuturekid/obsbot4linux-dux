@@ -75,8 +75,6 @@ Item {
                 // QQuickVideoSink's videoFrameChanged has no argument in QML (QVideoFrame is an
                 // opaque type there: no width, no isValid), so any emission counts
                 function onVideoFrameChanged() {
-                    if (!root.hasFrame)
-                        console.info("obsbot4linuxDux: first frame");
                     root.hasFrame = true;
                 }
             }
