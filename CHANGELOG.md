@@ -16,6 +16,8 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
   A failed or lost read shows "Could not read the presets" with a retry (#65).
 - Framing card: "Use current pose as start pose" and "Go to start pose" for the pose the camera
   takes at power-on, with the stored start pose shown when obsbot4linux reports it (#66).
+- Camera card: read-only info line with firmware, anti-flicker, frame rate, digital zoom and
+  wake-up zoom; a value the installed obsbot4linux does not report is left out (#67).
 
 ## [0.21.0] - 2026-10-31
 
