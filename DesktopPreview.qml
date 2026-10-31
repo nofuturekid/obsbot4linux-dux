@@ -20,8 +20,8 @@ DesktopPluginComponent {
     // the widget asks once for the size of its content with requestResize (transient, not saved).
     // Without it the saved size applies.
     readonly property real pictureWidth: 640
-    // wide enough for the longest chip label ("Normal Tracking") in a two-column grid
-    readonly property real sideWidth: 248
+    // the side column is as wide as its widest chip row (measured, see DesktopSide.naturalWidth)
+    readonly property real sideWidth: sideColumn.naturalWidth
     readonly property real contentWidth: pictureWidth + sideWidth + Theme.spacingM + Theme.spacingL * 2
     readonly property real defaultWidth: contentWidth
     readonly property real defaultHeight: 520
@@ -258,6 +258,7 @@ DesktopPluginComponent {
                 }
 
                 DesktopSide {
+                    id: sideColumn
                     width: root.sideWidth
                     height: frame.height
                     ctl: root

@@ -26,12 +26,47 @@ Item {
         return side.ctl.live ? side.ctl.speedOptions.findIndex(m => m.arg === side.ctl.status.tracking_speed) : -1;
     }
 
+    // Width the column needs: the widest pair of neighbouring mode chips side by side, and the widest
+    // single speed chip. Measured from real chips (the hidden DFilterChips below lay out in one
+    // row), so it follows the font and theme. The owner sizes the column to this, the chips wrap in it.
+    readonly property real naturalWidth: {
+        const spacing = measureModes.spacing;
+        // the Repeater is a child too, with no width
+        const modes = Array.from(measureModes.children).filter(c => c.width > 0);
+        const speeds = Array.from(measureSpeeds.children).filter(c => c.width > 0);
+        let widest = 0;
+        for (let i = 0; i < side.ctl.trackingModes.length; i += 2) {
+            const a = modes[i]?.width ?? 0;
+            const b = modes[i + 1]?.width ?? 0;
+            widest = Math.max(widest, a + (b > 0 ? spacing + b : 0));
+        }
+        for (let i = 0; i < side.ctl.speedOptions.length; i++)
+            widest = Math.max(widest, speeds[i]?.width ?? 0);
+        return Math.ceil(widest);
+    }
+
+    DFilterChips {
+        id: measureModes
+        visible: false
+        width: 100000
+        showCheck: false
+        model: side.ctl.trackingModes.map(m => m.label)
+    }
+
+    DFilterChips {
+        id: measureSpeeds
+        visible: false
+        width: 100000
+        showCheck: false
+        model: side.ctl.speedOptions.map(m => m.label)
+    }
+
     // A click assigns currentIndex and breaks its binding; follow the camera state again
     Connections {
         target: side.ctl
         function onCamChanged() {
-            modeRow.currentIndex = side.modeIndex();
-            speedRow.currentIndex = side.speedIndex();
+            modeRow.sync();
+            speedRow.sync();
         }
     }
 
@@ -91,12 +126,13 @@ Item {
         }
     }
 
-    ChipGrid {
+    ChipRow {
         id: modeRow
         anchors.top: statusItem.bottom
         anchors.topMargin: Theme.spacingM
         anchors.left: parent.left
         anchors.right: parent.right
+        stacked: true
         label: "Tracking mode"
         enabled: side.usable
         opacity: side.ctl.live ? 1 : 0.38
@@ -105,12 +141,13 @@ Item {
         onSelected: index => side.ctl.setMode(index)
     }
 
-    ChipGrid {
+    ChipRow {
         id: speedRow
         anchors.top: modeRow.bottom
         anchors.topMargin: Theme.spacingM
         anchors.left: parent.left
         anchors.right: parent.right
+        stacked: true
         label: "Tracking speed"
         enabled: side.usable
         opacity: side.ctl.live ? 1 : 0.38
