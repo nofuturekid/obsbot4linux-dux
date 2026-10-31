@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Common
+import qs.DCommon.Common
 import qs.DCommon.Widgets
 
 // One of the camera's three preset slots in the desktop widget's bottom row: a recall button with
@@ -18,7 +19,9 @@ Item {
 
     DButton {
         visible: slot.preset !== null
+        anchors.verticalCenter: parent.verticalCenter
         width: slot.width
+        buttonHeight: Style.buttonHeightS
         minimumWidth: 0
         maximumWidth: slot.width
         text: slot.preset?.name ?? ""
