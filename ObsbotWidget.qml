@@ -400,6 +400,11 @@ PluginComponent {
         root.send([on ? "wake" : "sleep"], on ? "Waking camera" : "Stowing lens", { status: { asleep: !on } });
     }
 
+    // The preview wakes a sleeping camera by opening the stream: show it awake at once
+    function assumeAwake() {
+        optimistic.change(++root.requestId, { status: { asleep: false } });
+    }
+
     function toggleAwake() {
         if (root.available)
             root.setAwake(!root.awake);

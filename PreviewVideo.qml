@@ -25,22 +25,6 @@ Item {
     // A frame has arrived since the camera was switched on
     property bool hasFrame: false
 
-    // A camera that was asleep (or is slow) may open without delivering frames: close and open
-    // it again, a few times, like after an error
-    Timer {
-        id: frameWatch
-        interval: 5000
-        repeat: true
-        running: root.running && !root.restarting && !root.hasFrame && root.device !== null
-        onTriggered: {
-            if (root.retries >= 10)
-                return;
-            root.retries++;
-            root.restarting = true;
-            retryTimer.restart();
-        }
-    }
-
     Timer {
         id: retryTimer
         interval: 300
@@ -88,8 +72,10 @@ Item {
 
             Connections {
                 target: videoOutput.videoSink
-                function onVideoFrameChanged() {
-                    if (videoOutput.videoSink.videoFrame.isValid)
+                // the sink hands the frame over (it has no videoFrame property in QML); the sink
+                // also announces an empty frame when the camera stops
+                function onVideoFrameChanged(frame) {
+                    if (frame && frame.width > 0)
                         root.hasFrame = true;
                 }
             }

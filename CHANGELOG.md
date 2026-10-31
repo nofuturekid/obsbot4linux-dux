@@ -16,7 +16,7 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
   shared (`OptimisticState.qml`) (#91).
 - Preview hint while the camera sleeps: the button is "Start preview" instead of "Wake camera".
   Opening the stream wakes the camera, so one click is enough; the hint shows "Waking camera…"
-  until the first frame, and the preview opens again if no frame arrives (#93).
+  until the first frame (at most 8 s), and the controls switch on at once (#93).
 
 ## [0.26.0] - 2026-10-31
 

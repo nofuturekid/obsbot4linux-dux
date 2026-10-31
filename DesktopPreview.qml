@@ -127,6 +127,11 @@ DesktopPluginComponent {
         root.send([on ? "wake" : "sleep"], { status: { asleep: !on } });
     }
 
+    // The preview wakes a sleeping camera by opening the stream: show it awake at once
+    function assumeAwake() {
+        optimistic.change(++root.requestId, { status: { asleep: false } });
+    }
+
     function setMode(index) {
         const mode = root.trackingModes[index];
         root.send(["tracking", mode.arg], { status: { ai_mode: mode.key } });

@@ -10,7 +10,7 @@ import qs.DCommon.Widgets
 // fitted inside. Used by the popout's PreviewPane and the desktop widget.
 //
 // ctl is what the frame needs from the camera: available, toolMissing, awake, live, previewReady,
-// videoNode, previewOn (read/write), interactionActive, refresh().
+// videoNode, previewOn (read/write), interactionActive, refresh(), assumeAwake().
 // interactive: false ignores hover and button (desktop edit mode).
 ClippingRectangle {
     id: frame
@@ -26,6 +26,13 @@ ClippingRectangle {
     // so until the first frame is there (#93)
     property bool startedAsleep: false
     readonly property bool frameSeen: videoLoader.item?.hasFrame ?? false
+    // Safety net: the hint never outlives this, whatever the frame detection does
+    Timer {
+        id: wakeLimit
+        interval: 8000
+        running: frame.startedAsleep
+        onTriggered: frame.startedAsleep = false
+    }
     readonly property bool waking: ctl.previewOn && ctl.available && !videoMissing && (!ctl.awake || (startedAsleep && !frameSeen))
     readonly property bool previewShown: ctl.previewOn && ctl.live && !videoMissing && !waking
     readonly property bool overlayShown: !previewShown || (interactive && frameHover.hovered)
@@ -57,6 +64,9 @@ ClippingRectangle {
         else if (ctl.previewReady) {
             startedAsleep = !ctl.awake;
             ctl.previewOn = true;
+            // opening the stream wakes the camera: show it awake until an event says so (3 s)
+            if (startedAsleep)
+                ctl.assumeAwake();
         }
     }
 
