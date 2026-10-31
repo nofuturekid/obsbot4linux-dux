@@ -8,6 +8,8 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-10-31
+
 ### Fixed
 
 - Switches, choices and sliders no longer jump back to the old value for a moment after a change.
