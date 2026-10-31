@@ -15,7 +15,7 @@ from obsbot4linux, and shows only the cards the camera can do (its
 
 The popout is 920 px wide (at most 90 % of the screen width; the left column takes 55 %, so the preview is larger). The left column is always there: Preview and Framing, so you can
 watch the picture while changing settings. The right column is a tab bar with three tabs:
-Tracking (Tracking, Zone), Picture (Picture, Image) and Device (Camera, Sleep, Audio,
+Tracking (Tracking, Zone, Presets), Picture (Picture, Image) and Device (Camera, Sleep, Audio,
 Gestures, Factory reset). The tab area is as high as the tallest tab, so the popout does
 not jump when switching; the last selected tab is remembered (`lastTab`). Collapsible
 cards start closed, one open per tab, and a closed card lists its settings under the title.
@@ -44,7 +44,12 @@ goes to its default tab, ordered by its place in the old column.
   desktop widget)
 - framing: pan/tilt d-pad with live pose and fine steps, center, zoom; the left and
   right arrows follow the picture (flipped while mirror is on); a manual
-  move switches tracking to Static
+  move switches tracking to Static; "Use current pose as start pose" and "Go to start pose"
+  (the pose the camera takes at power-on), with the stored start pose shown when obsbot4linux
+  reports it
+- presets: the camera's three slots with name and pose; Recall, Save current pose, Rename and
+  Delete (two-click confirmation); a note while zone tracking follows new targets, because a
+  recall makes the next zone return end in Static
 - zone: zone tracking on/off, the area (pan and tilt range,
   "Full area"), the return position with "Return here" (current pose) and "Go to return
   position", all read back from the camera. Leaving the area stops tracking (Static, back to the return
@@ -89,7 +94,7 @@ Right click is always sleep/wake. Further switches, all applied at once:
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | Hide the bar icon without a camera: follows the running watcher, no polling; the icon returns when the camera is plugged in again (off: the icon stays, dimmed) | `hideWithoutCamera`                                                                                                                                       | off     |
 | Status text in the bar: Static / Tracking / Asleep / Offline (no camera, dimmed) next to the icon in a fixed-width slot, horizontal bars only                   | `statusTextInBar`                                                                                                                                         | off     |
-| Popout cards: Preview, Framing, Camera, Sleep, Tracking, Zone, Picture, Image, Audio, Gestures, Factory reset                                                   | `cardPreview`, `cardFraming`, `cardCamera`, `cardSleep`, `cardTracking`, `cardZone`, `cardPicture`, `cardImage`, `cardAudio`, `cardGestures`, `cardReset` | on      |
+| Popout cards: Preview, Framing, Camera, Sleep, Tracking, Zone, Presets, Picture, Image, Audio, Gestures, Factory reset                                                   | `cardPreview`, `cardFraming`, `cardCamera`, `cardSleep`, `cardTracking`, `cardZone`, `cardPresets`, `cardPicture`, `cardImage`, `cardAudio`, `cardGestures`, `cardReset` | on      |
 
 The card switches affect the popout only (not the bar icon actions or the Control
 Center tile). A card the connected camera does not support stays hidden whatever its

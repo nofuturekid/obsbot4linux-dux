@@ -6,6 +6,17 @@ All notable changes to this widget. The format follows
 Changes that come from someone else (a merged pull request, or an issue or report that led to
 the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
+## [Unreleased]
+
+### Added
+
+- Presets card (Tracking tab, switch `cardPresets`): the camera's three preset slots with name and
+  pose, Recall, Save current pose, Rename and Delete (with a confirmation). While zone tracking
+  follows new targets the card says that a recall makes the next zone return end in Static
+  (#65).
+- Framing card: "Use current pose as start pose" and "Go to start pose" for the pose the camera
+  takes at power-on, with the stored start pose shown when obsbot4linux reports it (#66).
+
 ## [0.21.0] - 2026-10-31
 
 ### Added

@@ -106,6 +106,12 @@ PluginSettings {
     }
 
     ToggleSetting {
+        settingKey: "cardPresets"
+        label: "Presets"
+        defaultValue: true
+    }
+
+    ToggleSetting {
         settingKey: "cardPicture"
         label: "Picture"
         defaultValue: true
