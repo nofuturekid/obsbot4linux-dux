@@ -150,6 +150,7 @@ PluginComponent {
     onAvailableChanged: {
         if (!available)
             previewOn = false;
+        applyVisibility();
     }
 
     readonly property string statusText: {
@@ -592,7 +593,6 @@ PluginComponent {
             clearVisibilityOverride();
     }
     onHideWithoutCameraChanged: applyVisibility()
-    onAvailableChanged: applyVisibility()
     Component.onCompleted: {
         applyVisibility();
     }
