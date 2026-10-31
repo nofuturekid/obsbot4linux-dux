@@ -106,18 +106,21 @@ switch says. Hidden cards close up; a tab without cards drops out of the tab bar
 
 The plugin also provides a desktop widget: add **OBSBOT Control** in Settings → Desktop
 Widgets (it is listed next to the other desktop widgets) and place it like any other. Like the
-popout it has one fixed layout, a single card 340 px wide:
+popout it has one fixed layout, a single card (about 880 px wide) with the controls arranged
+around the picture:
 
-- **Picture area** (16:9, on top): dark with the "Preview is off" hint and a **Start preview**
-  button while the preview is off (or Wake camera / Retry when the camera is asleep or not
+- **Picture area** (640 × 360, 16:9, top left): dark with the "Preview is off" hint and a **Start
+  preview** button while the preview is off (or Wake camera / Retry when the camera is asleep or not
   reachable); the live picture while it runs, with **Stop preview** on hover. Stopping frees the
   camera.
-- **Panel** (below): status with the camera state (Awake, Asleep, Offline) and the tracking mode, a
-  red "On air" dot while another app reads the camera, tracking mode chips, zoom (slider and − / +),
-  the presets saved in the camera (empty slots are not shown; a click recalls one) and **Sleep** /
-  **Wake** (**Retry** when the camera is not reachable). Asleep and offline grey the controls out.
+- **Right of the picture:** status with the camera state (Awake, Asleep, Offline) and the tracking
+  mode, a red "On air" dot while another app reads the camera, the tracking mode chips, and **Sleep** /
+  **Wake** at the bottom (**Retry** when the camera is not reachable).
+- **Below the picture:** zoom (slider and − / +) on the left, the presets saved in the camera on
+  the right (empty slots are not shown; a click recalls one). Asleep and offline grey the controls
+  out.
 
-The height follows the panel's content and is not saved; the width is fixed. The preview never
+The height follows the bottom row's content and is not saved; the width is fixed. The preview never
 starts by itself: while it runs no other app can use the camera, and a small red dot in the
 corner shows that.
 

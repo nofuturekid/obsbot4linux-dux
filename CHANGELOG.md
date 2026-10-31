@@ -10,10 +10,10 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ### Added
 
-- Desktop widget: one fixed layout like the popout (340 px): the picture area on top (dark with the
-  "Preview is off" hint and Start button, live picture with Stop on hover) and a control panel below
-  it with status and on-air dot, tracking mode chips, zoom with − / +, the camera's saved presets
-  (recall) and Sleep / Wake. Stopping the preview frees the camera (#83).
+- Desktop widget: one fixed card like the popout's: a large picture area (640 × 360; dark with the
+  "Preview is off" hint and Start button, live picture with Stop on hover), to its right the status
+  with on-air dot, tracking mode chips and Sleep / Wake, below it zoom with − / + and the camera's
+  saved presets (recall). Stopping the preview frees the camera (#83).
 
 ### Removed
 

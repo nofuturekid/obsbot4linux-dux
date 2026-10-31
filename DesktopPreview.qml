@@ -14,13 +14,16 @@ import qs.Modules.Plugins
 DesktopPluginComponent {
     id: root
 
-    // Fixed layout: 16:9 picture on top, the panel below. DMS keeps one saved size per widget and
-    // the panel's height depends on the fonts and the presets, so the widget asks once for the
-    // height of its content with requestResize (transient, not saved; only the height changes
-    // with the content). Without it the saved size applies.
-    readonly property real contentWidth: 340
+    // Fixed layout, one card: the 16:9 picture (640 x 360) with the status, tracking mode and
+    // Sleep / Wake in a column to its right and zoom and presets in a row below it. DMS keeps one
+    // saved size per widget and the bottom row's height depends on the fonts and the presets, so
+    // the widget asks once for the size of its content with requestResize (transient, not saved).
+    // Without it the saved size applies.
+    readonly property real pictureWidth: 640
+    readonly property real sideWidth: 200
+    readonly property real contentWidth: pictureWidth + sideWidth + Theme.spacingM + Theme.spacingL * 2
     readonly property real defaultWidth: contentWidth
-    readonly property real defaultHeight: 480
+    readonly property real defaultHeight: 520
     minWidth: 240
     minHeight: 135
 
@@ -215,29 +218,40 @@ DesktopPluginComponent {
             width: card.width - Theme.spacingL * 2
             spacing: Theme.spacingM
 
-            PreviewFrame {
-                id: frame
+            Row {
                 width: parent.width
-                height: Math.round(width * 9 / 16)
-                ctl: root
-                interactive: !root.editing
-                dropBodyWhenTight: true
+                spacing: Theme.spacingM
 
-                // On air while the picture is live (the hover overlay keeps it visible)
-                Rectangle {
-                    visible: frame.previewShown
-                    width: Theme.spacingM
-                    height: width
-                    radius: width / 2
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.margins: Theme.spacingS
-                    color: Theme.error
+                PreviewFrame {
+                    id: frame
+                    width: root.pictureWidth
+                    height: Math.round(width * 9 / 16)
+                    ctl: root
+                    interactive: !root.editing
+                    dropBodyWhenTight: true
+
+                    // On air while the picture is live (the hover overlay keeps it visible)
+                    Rectangle {
+                        visible: frame.previewShown
+                        width: Theme.spacingM
+                        height: width
+                        radius: width / 2
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.margins: Theme.spacingS
+                        color: Theme.error
+                    }
+                }
+
+                DesktopSide {
+                    width: parent.width - frame.width - parent.spacing
+                    height: frame.height
+                    ctl: root
+                    interactive: !root.editing
                 }
             }
 
-            DesktopPanel {
-                id: panel
+            DesktopBottom {
                 width: parent.width
                 ctl: root
                 interactive: !root.editing
