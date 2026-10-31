@@ -8,6 +8,13 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+### Added
+
+- Desktop widget is now a compact control panel (320 px): status with an on-air dot, tracking mode
+  chips, zoom with − / +, the camera's saved presets (recall), Show preview and Sleep / Wake. The
+  preview opens on demand in place of the panel, with a slim hover overlay (mode chips, zoom − / +,
+  Close preview); closing it frees the camera (#83).
+
 ### Changed
 
 - Gestures card: Direction change is disabled (still showing the camera's value) while Dynamic zoom is
