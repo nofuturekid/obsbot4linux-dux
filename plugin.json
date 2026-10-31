@@ -2,7 +2,7 @@
   "id": "obsbot4linuxDux",
   "name": "OBSBOT Control",
   "description": "Bar widget and desktop preview for OBSBOT webcams, built on obsbot4linux (currently the Tiny 2 Lite): sleep/wake, AI tracking mode and speed, HDR, exposure, zoom, pan/tilt, image adjustments and a live preview",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "author": "nofuturekid",
   "license": "GPL-3.0-or-later",
   "icon": "videocam",

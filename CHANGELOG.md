@@ -8,17 +8,19 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-10-31
+
 ### Changed
 
 - Framing card: the pose readout, a 5°/1° step switch (replacing the Fine steps row) and the Zoom
   slider now sit beside the d-pad; on a popout too narrow for both they go below it. The start
   pose is one compact row with "Use current" and "Go" and the stored pose (#33).
-- Framing card: "Start mode" for the tracking mode stored in the camera's initial state (Not set,
-  Static, Normal, Upper Body, Headless, Group), shown with `startup_ai` (obsbot4linux 0.11.1). It
-  is only written when picked; the widget applies nothing itself (#80).
 
 ### Added
 
+- Framing card: "Start mode" for the tracking mode stored in the camera's initial state (Not set,
+  Static, Normal, Upper Body, Headless, Group), shown with `startup_ai` (obsbot4linux 0.11.1). It
+  is only written when picked; the widget applies nothing itself (#80).
 - Tracking card: hand tracking return position. While Hand is the tracking mode, "Return here",
   "Go to return position" and "Clear" set, use and delete the position the camera returns to after
   the hand left, with the stored position and the hand area shown. Needs `hand_return` (obsbot4linux
