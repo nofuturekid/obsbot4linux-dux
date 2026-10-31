@@ -8,6 +8,11 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
 
 ## [Unreleased]
 
+### Changed
+
+- Gestures card: Direction change is disabled (still showing the camera's value) while Dynamic zoom is
+  off, since it only reverses Dynamic zoom's direction, and has a description saying so (#81).
+
 ## [0.23.0] - 2026-10-31
 
 ### Changed
