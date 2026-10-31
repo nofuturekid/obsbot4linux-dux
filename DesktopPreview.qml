@@ -119,6 +119,9 @@ DesktopPluginComponent {
         watch.write(id, args);
     }
 
+    // The camera's own state says awake (without the optimistic patches)
+    readonly property bool awakeReported: optimistic.truth.available === true && optimistic.truth.status?.asleep === false
+
     function setAwake(on) {
         if (!watch.running)
             return;

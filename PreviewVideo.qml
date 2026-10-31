@@ -72,11 +72,12 @@ Item {
 
             Connections {
                 target: videoOutput.videoSink
-                // the sink hands the frame over (it has no videoFrame property in QML); the sink
-                // also announces an empty frame when the camera stops
-                function onVideoFrameChanged(frame) {
-                    if (frame && frame.width > 0)
-                        root.hasFrame = true;
+                // QQuickVideoSink's videoFrameChanged has no argument in QML (QVideoFrame is an
+                // opaque type there: no width, no isValid), so any emission counts
+                function onVideoFrameChanged() {
+                    if (!root.hasFrame)
+                        console.info("obsbot4linuxDux: first frame");
+                    root.hasFrame = true;
                 }
             }
         }

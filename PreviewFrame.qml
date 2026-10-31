@@ -10,7 +10,7 @@ import qs.DCommon.Widgets
 // fitted inside. Used by the popout's PreviewPane and the desktop widget.
 //
 // ctl is what the frame needs from the camera: available, toolMissing, awake, live, previewReady,
-// videoNode, previewOn (read/write), interactionActive, refresh(), assumeAwake().
+// videoNode, previewOn (read/write), interactionActive, refresh(), assumeAwake(), awakeReported.
 // interactive: false ignores hover and button (desktop edit mode).
 ClippingRectangle {
     id: frame
@@ -33,7 +33,7 @@ ClippingRectangle {
         running: frame.startedAsleep
         onTriggered: frame.startedAsleep = false
     }
-    readonly property bool waking: ctl.previewOn && ctl.available && !videoMissing && (!ctl.awake || (startedAsleep && !frameSeen))
+    readonly property bool waking: ctl.previewOn && ctl.available && !videoMissing && (!ctl.awake || (startedAsleep && !frameSeen && !ctl.awakeReported))
     readonly property bool previewShown: ctl.previewOn && ctl.live && !videoMissing && !waking
     readonly property bool overlayShown: !previewShown || (interactive && frameHover.hovered)
     readonly property var hint: previewShown
