@@ -343,11 +343,21 @@ PluginComponent {
     function handleReply(msg) {
         if (msg.id === root.pendingId)
             root.pendingLabel = "";
-        if (msg.id === root.presetListId && msg.ok !== false) {
+        // Any outstanding `preset list` counts, not only the newest: a slow answer to an earlier
+        // request must not be dropped just because the card asked again meanwhile
+        if (root.presetListIds[msg.id]) {
+            const rest = Object.assign({}, root.presetListIds);
+            delete rest[msg.id];
+            root.presetListIds = rest;
             // [{slot, name, pose: {pan, tilt, zoom}}], the slots in use
             const list = msg.result?.value;
-            if (Array.isArray(list))
+            if (msg.ok !== false && Array.isArray(list)) {
                 root.presets = list;
+                root.presetsFailed = false;
+                presetTimeout.stop();
+            } else {
+                root.presetsFailed = true;
+            }
         }
         if (root.presetOps[msg.id]) {
             const rest = Object.assign({}, root.presetOps);
@@ -374,6 +384,9 @@ PluginComponent {
 
     function onState(next) {
         const was = root.truth.status?.asleep;
+        // The card asked while the watch was not up yet, or before it restarted: read the list now
+        if (root.presets === null && root.presetsRequested && !root.presetsFailed && Object.keys(root.presetListIds).length === 0 && next.available === true && (next.capabilities ?? []).indexOf("preset") >= 0)
+            Qt.callLater(root.refreshPresets);
         root.truth = next;
         root.patches = ({});
         if (dragHold.running) {
@@ -438,15 +451,34 @@ PluginComponent {
     // Presets stored in the camera: null until `preset list` has answered. They are not part of
     // the state events, so the Presets card asks for the list when it needs it and after each change.
     property var presets: null
-    property int presetListId: 0
+    // Ids of the `preset list` requests not answered yet
+    property var presetListIds: ({})
+    // The card asked at least once; the list is then read again after a watch restart
+    property bool presetsRequested: false
+    // No usable answer (error, or none within the timeout): the card shows it with a retry
+    property bool presetsFailed: false
     // Ids of the preset commands in flight; the list is read again when one succeeded
     property var presetOps: ({})
 
     function refreshPresets() {
+        root.presetsRequested = true;
+        root.presetsFailed = false;
         if (!watch.running)
             return;
-        root.presetListId = ++root.requestId;
-        watch.write(root.presetListId, ["preset", "list"]);
+        const id = ++root.requestId;
+        root.presetListIds = Object.assign({}, root.presetListIds, { [id]: true });
+        watch.write(id, ["preset", "list"]);
+        presetTimeout.restart();
+    }
+
+    // "Reading presets..." must not stay forever (request lost, camera not answering)
+    Timer {
+        id: presetTimeout
+        interval: 8000
+        onTriggered: {
+            if (root.presets === null)
+                root.presetsFailed = true;
+        }
     }
 
     function presetCommand(args, label) {
@@ -551,6 +583,9 @@ PluginComponent {
             root.truth = ({});
             root.pendingLabel = "";
             root.presets = null;
+            root.presetListIds = ({});
+            root.presetsFailed = false;
+            presetTimeout.stop();
             root.presetOps = ({});
             root.stateRefreshed();
         }
