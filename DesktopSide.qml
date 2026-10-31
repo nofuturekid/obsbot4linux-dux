@@ -19,12 +19,19 @@ Item {
     readonly property string title: !ctl.available ? "Offline" : ctl.awake ? "Awake" : "Asleep"
     readonly property string subtitle: !ctl.available ? (ctl.toolMissing ? "Control tool not found" : "Camera not connected") : ctl.awake ? ctl.aiMode : "Lens stowed"
 
+    function modeIndex() {
+        return side.ctl.live ? side.ctl.trackingModes.findIndex(m => m.key === side.ctl.status.ai_mode) : -1;
+    }
+    function speedIndex() {
+        return side.ctl.live ? side.ctl.speedOptions.findIndex(m => m.arg === side.ctl.status.tracking_speed) : -1;
+    }
+
     // A click assigns currentIndex and breaks its binding; follow the camera state again
     Connections {
         target: side.ctl
         function onCamChanged() {
-            modeRow.sync();
-            speedRow.sync();
+            modeRow.currentIndex = side.modeIndex();
+            speedRow.currentIndex = side.speedIndex();
         }
     }
 
@@ -84,33 +91,31 @@ Item {
         }
     }
 
-    ChipRow {
+    ChipGrid {
         id: modeRow
         anchors.top: statusItem.bottom
         anchors.topMargin: Theme.spacingM
         anchors.left: parent.left
         anchors.right: parent.right
-        stacked: true
         label: "Tracking mode"
         enabled: side.usable
         opacity: side.ctl.live ? 1 : 0.38
         options: side.ctl.trackingModes.map(m => m.label)
-        currentIndex: side.ctl.live ? side.ctl.trackingModes.findIndex(m => m.key === side.ctl.status.ai_mode) : -1
+        currentIndex: side.modeIndex()
         onSelected: index => side.ctl.setMode(index)
     }
 
-    ChipRow {
+    ChipGrid {
         id: speedRow
         anchors.top: modeRow.bottom
         anchors.topMargin: Theme.spacingM
         anchors.left: parent.left
         anchors.right: parent.right
-        stacked: true
         label: "Tracking speed"
         enabled: side.usable
         opacity: side.ctl.live ? 1 : 0.38
         options: side.ctl.speedOptions.map(m => m.label)
-        currentIndex: side.ctl.live ? side.ctl.speedOptions.findIndex(m => m.arg === side.ctl.status.tracking_speed) : -1
+        currentIndex: side.speedIndex()
         onSelected: index => side.ctl.setSpeed(index)
     }
 }
