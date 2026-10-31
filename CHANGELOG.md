@@ -18,7 +18,6 @@ the change) are credited at the end of their line as `(#N, thanks @handle)`.
   takes at power-on, with the stored start pose shown when obsbot4linux reports it (#66).
 - Camera card: read-only info line with firmware, anti-flicker, frame rate, digital zoom and
   wake-up zoom; a value the installed obsbot4linux does not report is left out (#67).
-
 - Audio card: microphone volume slider; Camera card: status LED blink switch (the camera cannot
   report it, so it shows the last value set from the widget). Each shows only with obsbot4linux
   0.10 or newer (#74).
