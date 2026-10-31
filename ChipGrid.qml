@@ -1,9 +1,11 @@
 import QtQuick
 import qs.Common
+import qs.DCommon.Common
 import qs.DCommon.Widgets
 
 // Label above a two-column grid of equal-width single-select chips that fill the width exactly
 // (the desktop widget's side column). Labels are centred and elided if they do not fit.
+// Colours, height, radius, border and text follow DFilterChips (the popout's chips) token by token.
 Column {
     id: grid
 
@@ -37,11 +39,11 @@ Column {
                 readonly property bool selected: index === grid.currentIndex
 
                 width: grid.chipWidth
-                height: Theme.spacingXL + Theme.spacingS
-                radius: Theme.cornerRadius / 2
-                color: selected ? Theme.selectedContainer : "transparent"
-                border.width: selected ? 0 : 1
-                border.color: chip.enabled ? Theme.outlineVariant : Theme.withAlpha(Theme.surfaceText, 0.38)
+                height: Style.buttonHeightXS
+                radius: Style.cornerRadiusS
+                color: selected ? (chip.enabled ? Style.secondaryContainer : Style.onSurface_12) : "transparent"
+                border.width: selected ? 0 : Style.outlineWidth
+                border.color: chip.enabled ? Style.outlineVariant : Style.onSurface_38
 
                 StyledText {
                     anchors.fill: parent
@@ -50,8 +52,9 @@ Column {
                     verticalAlignment: Text.AlignVCenter
                     elide: Text.ElideRight
                     text: chip.modelData
-                    color: chip.selected ? Theme.onSelectedContainer : Theme.surfaceVariantText
-                    font.pixelSize: Theme.fontSizeSmall
+                    color: !chip.enabled ? Style.onSurface_38 : chip.selected ? Style.onSecondaryContainer : Style.onSurfaceVariant
+                    font.pixelSize: Style.fontSizeSmall
+                    font.weight: Style.fontWeightMedium
                 }
 
                 MouseArea {
